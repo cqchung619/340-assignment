@@ -2,6 +2,7 @@
 #define DEVICE_H
 
 #include "PCB.h"
+#include "PCBQueue.h"
 
 #include <queue>
 #include <string>
@@ -22,8 +23,11 @@ public:
     // Returns a const reference to the process in front of the queue.
     const PCB &Current_Process();
 
+    friend ostream &operator<<(ostream &out, const Device &a_device);
+
 private:
     std::string name_;
+    PCBQueue process_queue_;
 };
 
 #endif
