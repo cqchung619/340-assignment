@@ -1,6 +1,9 @@
 #include "PCBQueue.h"
 
 PCB *PCBQueue::dequeue() {
+    if (empty()) {
+        return nullptr;
+    }
     PCB *a_PCB = process_list_.front();
     process_list_.pop_front();
 

@@ -1,3 +1,10 @@
+/*
+Author: Cuong Chung
+Course: CSCI 34000
+Instructor: Eric Schweitzer
+Assignment #1: Basic data structures of OS
+*/
+
 #ifndef DEVICE_H
 #define DEVICE_H
 
