@@ -7,9 +7,11 @@ ostream &operator<<(ostream &out, const Device &a_device) {
         << setw(10) << "MEMSTART"
         << setw(5) << "R/W"
         << setw(20) << "FILE_LENGTH" << endl;
-
     out << "-----" << a_device.name_ << "-----" << endl;
-    out << a_device.process_queue_;
+
+    if (!a_device.process_queue_.empty()) {
+        out << a_device.process_queue_;
+    }
 
     return out;
 }

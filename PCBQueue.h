@@ -16,46 +16,38 @@ using namespace std;
 
 class PCBQueue {
 public:
-
-    ~PCBQueue() {
-        for (PCB *process : process_list_) {
-            delete process;
-        }
-        process_list_.clear();
-    }
-
     /*
      * Returns true if queue is empty, otherwise returns false.
      */
-    bool empty() { return process_list_.empty(); }
+    bool empty() const { return process_list_.empty(); }
 
     /*
      * Returns number of PCBs in queue.
      */
-    size_t size() { return process_list_.size(); }
+    size_t size() const { return process_list_.size(); }
 
     /*
      * Adds process to the back of the queue.
      */
-    void enqueue(PCB *&a_process) { process_list_.push_back(a_process); }
+    void enqueue(const PCB &a_process) { process_list_.push_back(a_process); }
 
     /*
-     * Removes and returns the process in front of the queue.
-     * If queue is empty, returns a nullptr.
+     * Removes the process in front of the queue and returns a copy.
+     * Assumes queue is non-empty.
      */
-    PCB *dequeue();
+    PCB dequeue();
 
     /*
-     * Returns the process in the front of the queue.
-     * If queue is empty, returns a nullptr.
+     * Returns a reference to the process in the front of the queue.
+     * Assumes queue is non-empty.
      */
-    PCB *front() { return (empty() ? nullptr : process_list_.front()); }
+    PCB &front();
 
     /*
-     * Returns the process in the back of the queue.
-     * If queue is empty, returns a nullptr.
+     * Returns a reference to the process in the back of the queue.
+     * Assumes queue is non-empty.
      */
-    PCB *back() { return (empty() ? nullptr : process_list_.back()); }
+     PCB &back();
 
     /*
      * Operator<< overload.
@@ -63,7 +55,7 @@ public:
     friend ostream &operator<<(ostream &out, const PCBQueue &a_PCB_Queue);
 
 private:
-    list<PCB*> process_list_;
+    list<PCB> process_list_;
 };
 
 #endif

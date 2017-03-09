@@ -25,6 +25,12 @@ public:
     PCB(const unsigned int a_PID): state_{PCB::NEW}, PID_(a_PID) {}
 
     /*
+     * @rhs: PCB to be copied.
+     * Constructs a copy of rhs.
+     */
+    PCB(const PCB &rhs): state_{rhs.state_}, PID_{rhs.PID_}, parameters_{rhs.parameters_} {}
+
+    /*
      * State accessor and modifier.
      */
     State &Get_State() { return state_; }
