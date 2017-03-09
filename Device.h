@@ -46,7 +46,7 @@ public:
      */
     friend ostream &operator<<(ostream &out, const Device &a_device);
 
-private:
+protected:
     string name_;
     PCBQueue process_queue_;
 };

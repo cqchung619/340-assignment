@@ -8,10 +8,7 @@ ostream &operator<<(ostream &out, const Device &a_device) {
         << setw(5) << "R/W"
         << setw(20) << "FILE_LENGTH" << endl;
     out << "-----" << a_device.name_ << "-----" << endl;
-
-    if (!a_device.process_queue_.empty()) {
-        out << a_device.process_queue_;
-    }
+    a_device.process_queue_.Output_Processes(out, PCB::DEVICE);
 
     return out;
 }

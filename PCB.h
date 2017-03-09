@@ -16,6 +16,7 @@ using namespace std;
 
 class PCB {
 public:
+    enum OutputFormat { CPU, DEVICE };
     enum State { NEW, READY, RUNNING, WAITING };
 
     /*
@@ -50,9 +51,10 @@ public:
     void Clear_Params() { parameters_.clear(); }
 
     /*
-     * Operator<< overload.
+     * Outputs the PCB to out in the specified format.
+     * If format is DEVICE, it assumes parameters_ has at least 4 elements.
      */
-    friend ostream &operator<<(ostream &out, const PCB &a_PCB);
+    void Output_PCB(ostream &out, OutputFormat format) const;
 
 private:
     State state_;

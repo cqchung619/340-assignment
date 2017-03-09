@@ -6,47 +6,64 @@ Assignment #1: Basic data structures of OS
 */
 
 #include "OS.h"
-#include "Device.h"
-#include "PCB.h"
 using namespace std;
 
+bool Is_Valid_Numeric_Input(const string& user_input) {
+    if (user_input == "") {
+        return false;
+    }
+
+    for (unsigned int i = 0; i < user_input.length(); i++) {
+        if (!isdigit(user_input[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+OS Sys_Gen() {
+    vector<unsigned int> device_count;
+    cout << "System Installation: " << endl;
+
+    string number_of_device = "";
+
+    // Printers generation.
+    cout << "How many printers will be installed?\n> ";
+    getline(cin, number_of_device);
+    while (!Is_Valid_Numeric_Input(number_of_device)) {
+        cout << "Invalid input. Please enter a valid number:\n> ";
+        getline(cin, number_of_device);
+    }
+    device_count.push_back(stoi(number_of_device));
+
+    // Disks generation.
+    cout << "How many disks will be installed?\n> ";
+    getline(cin, number_of_device);
+    while (!Is_Valid_Numeric_Input(number_of_device)) {
+        cout << "Invalid input. Please enter a valid number:\n> ";
+        getline(cin, number_of_device);
+    }
+    device_count.push_back(stoi(number_of_device));
+
+    // CD/RWs generation.
+    cout << "How many CD/RWs will be installed?\n> ";
+    getline(cin, number_of_device);
+    while (!Is_Valid_Numeric_Input(number_of_device)) {
+        cout << "Invalid input. Please enter a valid number:\n> ";
+        getline(cin, number_of_device);
+    }
+    device_count.push_back(stoi(number_of_device));
+
+    OS an_OS{};
+    an_OS.Initialize_Devices(device_count);
+
+    return an_OS;
+}
 
 int main() {
-    // OS system340;
-    // system340.Run();
-
-    Device d1{"printer1"};
-    // cout << "Empty Device: " << endl << d1;
-    cout << d1 << endl;;
-
-    PCB p1{0};
-    PCB p2{1};
-    p1.Add_Param("input.txt");
-    p1.Add_Param("3425");
-    p1.Add_Param("W");
-    p1.Add_Param("154");
-    p2.Add_Param("input2.txt");
-    p2.Add_Param("273");
-    p2.Add_Param("W");
-    p2.Add_Param("33");
-
-    d1.Add_Process(p1);
-    cout << d1 << endl;;
-    d1.Add_Process(p2);
-    cout << d1 << endl;;
-
-    d1.Remove_Current_Process();
-    cout << d1 << endl;;
-    d1.Add_Process(p1);
-    cout << d1 << endl;;
-    d1.Add_Process(p1);
-    cout << d1 << endl;;
-    d1.Remove_Current_Process();
-    cout << d1 << endl;;
-    d1.Add_Process(p2);
-    cout << d1 << endl;;
-    d1.Add_Process(p2);
-    cout << d1 << endl;;
+    OS system340 = Sys_Gen();
+    system340.Run();
 
     return 0;
 }

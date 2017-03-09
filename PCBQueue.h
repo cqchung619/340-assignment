@@ -47,12 +47,13 @@ public:
      * Returns a reference to the process in the back of the queue.
      * Assumes queue is non-empty.
      */
-     PCB &back();
+    PCB &back();
 
     /*
-     * Operator<< overload.
+     * Outputs the process_list_ to out in the specified format.
      */
-    friend ostream &operator<<(ostream &out, const PCBQueue &a_PCB_Queue);
+    void Output_Processes(ostream &out, PCB::OutputFormat format) const;
+
 
 private:
     list<PCB> process_list_;

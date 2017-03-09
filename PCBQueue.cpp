@@ -26,10 +26,8 @@ PCB &PCBQueue::back() {
     return back_PCB;
 }
 
-ostream &operator<<(ostream &out, const PCBQueue &a_PCB_Queue) {
-    for (auto it = a_PCB_Queue.process_list_.begin(); it != a_PCB_Queue.process_list_.end(); ++it) {
-        out << *it << endl;
+void PCBQueue::Output_Processes(ostream &out, PCB::OutputFormat format) const {
+    for (auto it = process_list_.begin(); it != process_list_.end(); ++it) {
+        (*it).Output_PCB(out, format);
     }
-
-    return out;
 }
