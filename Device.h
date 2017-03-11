@@ -19,6 +19,9 @@ class Device {
 public:
     Device(const string &a_name): name_{a_name} {}
 
+    // Returns true if process_queue_ is empty (Device has no requests), otherwise returns false.
+    bool Is_Idle() { return process_queue_.empty(); }
+
     // Returns const reference to name_;
     const string &Get_Name() const { return name_; }
 
