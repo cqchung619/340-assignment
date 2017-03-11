@@ -1,4 +1,4 @@
-Cuong Chung
+﻿Cuong Chung
 CSCI 34000 – Assignment #1 README
 Prof. Eric Schweitzer
 
