@@ -58,6 +58,10 @@ private:
     // System Call Handler function.
     void Handle_Sys_Call(const string &an_input);
 
+    void Create_Process();
+    void Snapshot();
+    void Terminate_Running_Process();
+
     void test();
 };
 

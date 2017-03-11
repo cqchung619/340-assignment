@@ -44,7 +44,14 @@ bool OS::Is_Valid_Signal_Input(const string &an_input) {
     } else if (input_length == 2) { // (P/C/D)#, (p/c/d)#
         if (isalpha(an_input[0]) && isdigit(an_input[1])) { // (letter)(number)
             // true if an_input found, otherwise false (Device does not exist).
-            is_valid = (device_table_.find(an_input) != device_table_.end() ) ;
+            if (isupper(an_input[0])) { // Device names start with lowercase letters.
+                string temp = "";
+                temp += tolower(an_input[0]);
+                temp += an_input[1];
+                is_valid = (device_table_.find(temp) != device_table_.end()) ;
+            } else {
+                is_valid = (device_table_.find(an_input) != device_table_.end());
+            }
         }
     } else if (an_input == "EXIT" || an_input == "exit") {
         is_valid = true;
@@ -56,7 +63,7 @@ bool OS::Is_Valid_Signal_Input(const string &an_input) {
 void OS::Process_Input(const string &an_input) {
     switch (an_input.length()) {
         case 1:
-            if (isupper(an_input)) {
+            if (isupper(an_input[0])) {
                 Handle_Interrupt(an_input);
             } else {
                 Handle_Sys_Call(an_input);
@@ -75,21 +82,53 @@ void OS::Process_Input(const string &an_input) {
     }
 }
 
-void Handle_Interrupt(const string *an_input) {
-    switch ((char) an_input) {
+void OS::Handle_Interrupt(const string &an_input) {
+    switch (an_input[0]) {
         case 'A':
+            Create_Process();
             break;
         case 'S':
-            
-
+            Snapshot();
             break;
-        case 't':
+        case 'P':
+            cout << "Device finished" << endl;
+            break;
+        case 'C':
+            cout << "Device finished" << endl;
+            break;
+        case 'D':
+            cout << "Device finished" << endl;
             break;
     }
 }
 
-void Handle_Sys_Call(const string &an_input) {
+void OS::Handle_Sys_Call(const string &an_input) {
+    switch (an_input[0]) {
+        case 't':
+            Terminate_Running_Process();
+            break;
+        case 'p':
+            cout << "Requesting Device" << endl;
+            break;
+        case 'c':
+            cout << "Requesting Device" << endl;
+            break;
+        case 'd':
+            cout << "Requesting Device" << endl;
+            break;
+    }
+}
 
+void OS::Create_Process() {
+    cout << "Creation" << endl;
+}
+
+void OS::Snapshot() {
+    cout << "Snapshot" << endl;
+}
+
+void OS::Terminate_Running_Process() {
+    cout << "Terminate" << endl;
 }
 
 void OS::Run() {
@@ -99,7 +138,7 @@ void OS::Run() {
         getline(cin, input);
 
         if (Is_Valid_Signal_Input(input)) {
-            Handle_Input(input);
+            Process_Input(input);
         } else {
             cout << "Invalid\n";
         }
