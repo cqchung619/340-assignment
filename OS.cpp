@@ -1,8 +1,37 @@
 #include "OS.h"
 
-void OS::Initialize_Devices(const vector<unsigned int> &number_of_devices) {
-    for (auto elem : number_of_devices) {
-        cout << elem << endl;
+void OS::Initialize_Devices(const vector<unsigned int> &device_count) {
+    unsigned int number_of_printers = device_count[0];
+    unsigned int number_of_disks = device_count[1];
+    unsigned int number_of_optical_drives = device_count[2];
+
+    for (unsigned int i = 0; i < number_of_printers; ++i) {
+        string name = "p" + to_string(i);
+        Device printer{name};
+        device_table_.insert(std::pair<string, Device>{name, printer});
+    }
+
+    for (unsigned int i = 0; i < number_of_disks; ++i) {
+        string name = "d" + to_string(i);
+        Device disk{name};
+        device_table_.insert(std::pair<string, Device>{name, disk});
+    }
+
+    for (unsigned int i = 0; i < number_of_optical_drives; ++i) {
+        string name = "c" + to_string(i);
+        Device optical_drive{name};
+        device_table_.insert(std::pair<string, Device>{name, optical_drive});
+    }
+
+    cout << left
+        << setw(5) << "PID"
+        << setw(20) << "FILENAME"
+        << setw(10) << "MEMSTART"
+        << setw(5) << "R/W"
+        << setw(20) << "FILE_LENGTH" << endl;
+
+    for (auto it = device_table_.begin(); it != device_table_.end(); ++it) {
+        cout << it->second << endl;
     }
 }
 
@@ -43,23 +72,40 @@ void OS::Handle_Input(const string &an_input) {
 
     Device d1{"printer 1"};
     // CPU d1;
-    PCB p1{0};
-    p1.Add_Param("input.txt");
-    p1.Add_Param("132");
-    p1.Add_Param("W");
-    p1.Add_Param("31");
+    PCB *p0 = new PCB{0};
+    p0->Add_Param("input.txt");
+    p0->Add_Param("132");
+    p0->Add_Param("W");
+    p0->Add_Param("31");
 
     cout << d1 << endl;
+    d1.Add_Process(p0);
+    cout << d1 << endl;
+
+    PCB *p1 = new PCB{1};
+    p1->Add_Param("output.txt");
+    p1->Add_Param("345");
+    p1->Add_Param("W");
+    p1->Add_Param("41");
+    PCB *p2 = new PCB{2};
+    p2->Add_Param("data.txt");
+    p2->Add_Param("567");
+    p2->Add_Param("R");
+    p2->Add_Param("902");
+    PCB *p3 = new PCB{3};
+    p3->Add_Param("password.txt");
+    p3->Add_Param("21");
+    p3->Add_Param("W");
+    p3->Add_Param("345");
+    PCB *p4 = new PCB{4};
+    p4->Add_Param("hash.txt");
+    p4->Add_Param("987");
+    p4->Add_Param("R");
+    p4->Add_Param("75");
+
+    d1.Add_Process(p2);
     d1.Add_Process(p1);
-    cout << d1 << endl;
-
-    PCB p2{2};
-    PCB p3{3};
-    PCB p4{4};
-    PCB p5{5};
-    // d1.Add_Process(p3);
-    // d1.Add_Process(p2);
-    // d1.Add_Process(p5);
-    // d1.Add_Process(p4);
+    d1.Add_Process(p4);
+    d1.Add_Process(p3);
     cout << d1;
 }

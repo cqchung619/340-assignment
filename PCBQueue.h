@@ -16,47 +16,39 @@ using namespace std;
 
 class PCBQueue {
 public:
-    /*
-     * Returns true if queue is empty, otherwise returns false.
-     */
+    // Destructor
+    ~PCBQueue() {
+        for (auto process : process_list_) {
+            delete process;
+        }
+    }
+
+    // Returns true if queue is empty, otherwise returns false.
     bool empty() const { return process_list_.empty(); }
 
-    /*
-     * Returns number of PCBs in queue.
-     */
+    // Returns number of PCBs in queue.
     size_t size() const { return process_list_.size(); }
 
-    /*
-     * Adds process to the back of the queue.
-     */
-    void enqueue(const PCB &a_process) { process_list_.push_back(a_process); }
+    // Adds process to the back of the queue.
+    void enqueue(PCB *a_process) { process_list_.push_back(a_process); }
 
-    /*
-     * Removes the process in front of the queue and returns a copy.
-     * Assumes queue is non-empty.
-     */
-    PCB dequeue();
+    // Removes the process in front of the queue and returns a copy.
+    // Assumes queue is non-empty.
+    PCB *dequeue();
 
-    /*
-     * Returns a reference to the process in the front of the queue.
-     * Assumes queue is non-empty.
-     */
-    PCB &front();
+    // Returns a reference to the process in the front of the queue.
+    // Assumes queue is non-empty.
+    PCB *front();
 
-    /*
-     * Returns a reference to the process in the back of the queue.
-     * Assumes queue is non-empty.
-     */
-    PCB &back();
+    // Returns a reference to the process in the back of the queue.
+    // Assumes queue is non-empty.
+    PCB *back();
 
-    /*
-     * Outputs the process_list_ to out in the specified format.
-     */
+    // Outputs the process_list_ to out in the specified format.
     void Output_Processes(ostream &out, PCB::OutputFormat format) const;
 
-
 private:
-    list<PCB> process_list_;
+    list<PCB*> process_list_;
 };
 
 #endif

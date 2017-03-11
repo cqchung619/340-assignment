@@ -11,7 +11,7 @@ Assignment #1: Basic data structures of OS
 #include "PCB.h"
 #include "PCBQueue.h"
 
-#include <queue>
+#include <iostream>
 #include <string>
 using namespace std;
 
@@ -19,31 +19,21 @@ class Device {
 public:
     Device(const string &a_name): name_{a_name} {}
 
-    /*
-     * Returns const reference to name_;
-     */
-    const string &Get_Name() { return name_; }
+    // Returns const reference to name_;
+    const string &Get_Name() const { return name_; }
 
-    /*
-     * Add process to the back of the queue.
-     */
-    void Add_Process(const PCB &a_process) { process_queue_.enqueue(a_process); }
+    // Add process to the back of the queue.
+    void Add_Process(PCB *a_process) { process_queue_.enqueue(a_process); }
 
-    /*
-     * Remove and returns the process in the front of the queue.
-     * Assumes queue is non-empty.
-     */
-    PCB Remove_Current_Process() { return process_queue_.dequeue(); }
+    // Remove and returns the process in the front of the queue.
+    // Assumes queue is non-empty.
+    PCB *Remove_Running_Process() { return process_queue_.dequeue(); }
 
-    /*
-     * Returns a const reference to the process in front of the queue.
-     * Assumes queue is non-empty.
-     */
-    const PCB &Current_Process() { return process_queue_.front(); }
+    // Returns a const reference to the process in front of the queue.
+    // Assumes queue is non-empty.
+    const PCB *Running_Process() { return process_queue_.front(); }
 
-    /*
-     * Operator<< overload.
-     */
+    // Operator<< overload.
     friend ostream &operator<<(ostream &out, const Device &a_device);
 
 protected:
