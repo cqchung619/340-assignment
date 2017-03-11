@@ -7,20 +7,20 @@ void OS::Initialize_Devices(const vector<unsigned int> &device_count) {
 
     for (unsigned int i = 0; i < number_of_printers; ++i) {
         string name = "p" + to_string(i);
-        Device printer{name};
-        device_table_.insert(std::pair<string, Device>{name, printer});
+        Device *printer = new Device{name};
+        device_table_.insert(std::pair<string, Device*>{name, printer});
     }
 
     for (unsigned int i = 0; i < number_of_disks; ++i) {
         string name = "d" + to_string(i);
-        Device disk{name};
-        device_table_.insert(std::pair<string, Device>{name, disk});
+        Device *disk = new Device{name};
+        device_table_.insert(std::pair<string, Device*>{name, disk});
     }
 
     for (unsigned int i = 0; i < number_of_optical_drives; ++i) {
         string name = "c" + to_string(i);
-        Device optical_drive{name};
-        device_table_.insert(std::pair<string, Device>{name, optical_drive});
+        Device *optical_drive = new Device{name};
+        device_table_.insert(std::pair<string, Device*>{name, optical_drive});
     }
 
     cout << left
@@ -31,19 +31,74 @@ void OS::Initialize_Devices(const vector<unsigned int> &device_count) {
         << setw(20) << "FILE_LENGTH" << endl;
 
     for (auto it = device_table_.begin(); it != device_table_.end(); ++it) {
-        cout << it->second << endl;
+        cout << *(it->second) << endl;
     }
 }
 
-void OS::Run() {
-    running = true;
+bool OS::Is_Valid_Signal_Input(const string &an_input) {
+    size_t input_length = an_input.length();
+    bool is_valid = false;
 
-    while (running) {
+    if (input_length == 1) { // A, S, t
+        is_valid = an_input == "A" || an_input == "S" || an_input == "t";
+    } else if (input_length == 2) { // (P/C/D)#, (p/c/d)#
+        if (isalpha(an_input[0]) && isdigit(an_input[1])) { // (letter)(number)
+            // true if an_input found, otherwise false (Device does not exist).
+            is_valid = (device_table_.find(an_input) != device_table_.end() ) ;
+        }
+    } else if (an_input == "EXIT" || an_input == "exit") {
+        is_valid = true;
+    }
+
+    return is_valid;
+}
+
+void OS::Process_Input(const string &an_input) {
+    switch (an_input.length()) {
+        case 1:
+            if (isupper(an_input)) {
+                Handle_Interrupt(an_input);
+            } else {
+                Handle_Sys_Call(an_input);
+            }
+            break;
+        case 2:
+            if (isupper(an_input[0])) {
+                Handle_Interrupt(an_input);
+            } else {
+                Handle_Sys_Call(an_input);
+            }
+            break;
+        default:
+            running_ = false;
+            break;
+    }
+}
+
+void Handle_Interrupt(const string *an_input) {
+    switch ((char) an_input) {
+        case 'A':
+            break;
+        case 'S':
+            
+
+            break;
+        case 't':
+            break;
+    }
+}
+
+void Handle_Sys_Call(const string &an_input) {
+
+}
+
+void OS::Run() {
+    while (running_) {
         cout << "> ";
         string input = "";
         getline(cin, input);
 
-        if (Is_Valid_Input(input)) {
+        if (Is_Valid_Signal_Input(input)) {
             Handle_Input(input);
         } else {
             cout << "Invalid\n";
@@ -51,25 +106,7 @@ void OS::Run() {
     }
 }
 
-bool OS::Is_Valid_Input(const string &an_input) {
-    size_t input_length = an_input.length();
-    bool is_valid = false;
-    if (input_length == 1) {
-        is_valid = an_input == "A" || an_input == "S";
-    } else if (input_length == 2) {
-        is_valid = true;
-    } else if (an_input == "EXIT") {
-        is_valid = true;
-    }
-
-    return is_valid;
-}
-
-void OS::Handle_Input(const string &an_input) {
-    if (an_input == "EXIT") {
-        running = false;
-    }
-
+void OS::test() {
     Device d1{"printer 1"};
     // CPU d1;
     PCB *p0 = new PCB{0};
