@@ -38,18 +38,21 @@ bool OS::Is_Valid_Signal_Input(const string &an_input) {
                 temp += tolower(an_input[0]);
                 temp += an_input[1];
                 for (auto table : device_table_) {
-                    is_valid = (table.second.count(temp) != 0) ;
+                    if (table.second.count(temp) != 0) {
+                        is_valid = true;
+                    }
                 }
             } else {
                 for (auto table : device_table_) {
-                    is_valid = (table.second.count(an_input) != 0) ;
+                    if (table.second.count(an_input) != 0) {
+                        is_valid  = true;
+                    }
                 }
             }
         }
     } else if (an_input == "EXIT" || an_input == "exit") {
         is_valid = true;
     }
-
     return is_valid;
 }
 
@@ -76,6 +79,11 @@ void OS::Process_Input(const string &an_input) {
 }
 
 void OS::Handle_Interrupt(const string &an_input) {
+    string temp = "";
+    temp = tolower(an_input[0]);
+    temp += an_input[1];
+
+
     switch (an_input[0]) {
         case 'A':
             Create_Process();
@@ -84,34 +92,25 @@ void OS::Handle_Interrupt(const string &an_input) {
             Snapshot();
             break;
         case 'P':
-            cout << "Device finished" << endl;
-            break;
-        case 'D':
-            cout << "Device finished" << endl;
-            break;
-        case 'C':
-            cout << "Device finished" << endl;
-            break;
-    }
-}
-
-void OS::Handle_Sys_Call(const string &an_input) {
-    switch (an_input[0]) {
-        case 't':
-            if (!cpu_->Is_Idle() && !ready_queue_->empty()) {
-                Terminate_Running_Process();
+            if (device_table_["printers"].find(temp)->second->Is_Idle()) {
+                break;
             } else {
-                cout << "Error: No running process" << endl;
+                cout << "Device finished" << endl;
             }
             break;
-        case 'p':
-            cout << "Requesting Device" << endl;
+        case 'D':
+            if (device_table_["disks"].find(temp)->second->Is_Idle()) {
+                break;
+            } else {
+                cout << "Device finished" << endl;
+            }
             break;
-        case 'd':
-            cout << "Requesting Device" << endl;
-            break;
-        case 'c':
-            cout << "Requesting Device" << endl;
+        case 'C':
+            if (device_table_["CD/RWs"].find(temp)->second->Is_Idle()) {
+                break;
+            } else {
+                cout << "Device finished" << endl;
+            }
             break;
     }
 }
@@ -120,15 +119,6 @@ void OS::Create_Process() {
     PCB *new_process = new PCB(PID_counter_++);
     ready_queue_->enqueue(new_process);
     if (cpu_->Is_Idle()) {
-        cpu_->Bind_Process(ready_queue_->front());
-    }
-}
-
-void OS::Terminate_Running_Process() {
-    cpu_->Unbind_Process();
-    PCB *terminated_process = ready_queue_->dequeue();
-    delete terminated_process;
-    if (!ready_queue_->empty()) {
         cpu_->Bind_Process(ready_queue_->front());
     }
 }
@@ -144,49 +134,166 @@ void OS::Snapshot() {
                       an_input == "d" || an_input == "c";
     } while (!valid_input);
 
+
+    if (an_input == "r") {
+        cout << "---Ready Queue---" << endl;
+        cout << right
+             << setw(5) << "PID" << endl;
+        ready_queue_->Output_Processes(cout, PCB::CPU);
+    } else {
+        cout << right
+             << setw(5) << "PID"
+             << left
+             << setw(20) << " FILENAME"
+             << right
+             << setw(10) << "MEMSTART"
+             << setw(5) << "R/W"
+             << left
+             << setw(20) << " FILE_LENGTH" << endl;
+
+        switch (an_input[0]) {
+            case 'p':
+                for (auto printer : device_table_["printers"]) {
+                    cout << *(printer.second);
+                }
+                break;
+            case 'd':
+                for (auto disk : device_table_["disks"]) {
+                    cout << *(disk.second);
+                }
+                break;
+            case 'c':
+                for (auto optical_drive : device_table_["CD/RWs"]) {
+                    cout << *(optical_drive.second);
+                }
+                break;
+        }
+    }
+}
+
+void OS::Handle_Sys_Call(const string &an_input) {
+    if (cpu_->Is_Idle()) {
+        cout << "Error: No running process" << endl;
+        return;
+    }
+
     switch (an_input[0]) {
-        case 'r':
-            cout << "---Ready Queue---" << endl;
-            cout << right
-                 << setw(5) << "PID" << endl;
-            ready_queue_->Output_Processes(cout, PCB::CPU);
+        case 't':
+            Terminate_Running_Process();
             break;
         case 'p':
-            cout << right
-                 << setw(5) << "PID"
-                 << setw(20) << "FILENAME"
-                 << setw(10) << "MEMSTART"
-                 << setw(5) << "R/W"
-                 << setw(20) << "FILE_LENGTH" << endl;
-
-            for (auto printer : device_table_["printers"]) {
-                cout << *(printer.second) << endl;
-            }
+            Request_Printer(device_table_["printers"].find(an_input)->second);
             break;
         case 'd':
-            cout << right
-                << setw(5) << "PID"
-                << setw(20) << "FILENAME"
-                << setw(10) << "MEMSTART"
-                << setw(5) << "R/W"
-                << setw(20) << "FILE_LENGTH" << endl;
-
-            for (auto disk : device_table_["disks"]) {
-                cout << *(disk.second) << endl;
-            }
+            Request_Disk(device_table_["disks"].find(an_input)->second);
             break;
         case 'c':
-            cout << right
-                << setw(5) << "PID"
-                << setw(20) << "FILENAME"
-                << setw(10) << "MEMSTART"
-                << setw(5) << "R/W"
-                << setw(20) << "FILE_LENGTH" << endl;
-
-            for (auto optical_drive : device_table_["CD/RWs"]) {
-                cout << *(optical_drive.second) << endl;
-            }
+            Request_Optical_Drive(device_table_["CD/RWs"].find(an_input)->second);
             break;
+    }
+}
+
+void OS::Terminate_Running_Process() {
+    cpu_->Unbind_Process();
+    PCB *terminated_process = ready_queue_->dequeue();
+    delete terminated_process;
+    if (!ready_queue_->empty()) {
+        cpu_->Bind_Process(ready_queue_->front());
+    }
+}
+
+void OS::Acquire_Parameters(PCB *a_process, bool is_write_only) {
+    string param = "";
+
+    // Filename
+    do {
+        cout << "What is the filename?\n> ";
+        getline(cin, param);
+    } while (param == "");
+    a_process->Add_Param(param);
+
+    // Memstart
+    do {
+        cout << "Where is the memstart location (numerical)?\n> ";
+        getline(cin, param);
+    } while (param == "" || !Is_Valid_Numeric_Input(param));
+    a_process->Add_Param(param);
+
+    // R/W
+    if (is_write_only) {
+        a_process->Add_Param("W");
+    } else {
+        do {
+            cout << "Is this a read or write (R/W)?\n> ";
+            getline(cin, param);
+        } while (param == "" || (param != "R" && param != "W"));
+        a_process->Add_Param(param);
+    }
+
+    // File Length
+    do {
+        cout << "What is the file length (numerical)?\n> ";
+        getline(cin, param);
+    } while (param == "" || !Is_Valid_Numeric_Input(param));
+    a_process->Add_Param(param);
+}
+
+bool OS::Is_Valid_Numeric_Input(const string& user_input) {
+    if (user_input == "") {
+        return false;
+    }
+
+    for (size_t i = 0; i < user_input.length(); i++) {
+        if (!isdigit(user_input[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void OS::Request_Printer(Device *a_printer) {
+    // Unbind process from CPU and remove from ready_queue_.
+    cpu_->Unbind_Process();
+    PCB *calling_process = ready_queue_->dequeue();
+
+    // Get parameters and add to device queue.
+    Acquire_Parameters(calling_process, true);
+    a_printer->Add_Process(calling_process);
+
+    // Bind next process to CPU if available.
+    if (!ready_queue_->empty()) {
+        cpu_->Bind_Process(ready_queue_->front());
+    }
+}
+
+void OS::Request_Disk(Device *a_disk) {
+    // Unbind process from CPU and remove from ready_queue_.
+    cpu_->Unbind_Process();
+    PCB *calling_process = ready_queue_->dequeue();
+
+    // Get parameters and add to device queue.
+    Acquire_Parameters(calling_process, false);
+    a_disk->Add_Process(calling_process);
+
+    // Bind next process to CPU if available.
+    if (!ready_queue_->empty()) {
+        cpu_->Bind_Process(ready_queue_->front());
+    }
+}
+
+void OS::Request_Optical_Drive(Device *an_optical_drive) {
+    // Unbind process from CPU and remove from ready_queue_.
+    cpu_->Unbind_Process();
+    PCB *calling_process = ready_queue_->dequeue();
+
+    // Get parameters and add to device queue.
+    Acquire_Parameters(calling_process, false);
+    an_optical_drive->Add_Process(calling_process);
+
+    // Bind next process to CPU if available.
+    if (!ready_queue_->empty()) {
+        cpu_->Bind_Process(ready_queue_->front());
     }
 }
 

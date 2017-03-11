@@ -46,6 +46,7 @@ private:
     map<string, map<string, Device*>> device_table_;
 
     // Input validator for interrupts and system calls.
+    // Verifies that device exists.
     // Valid only if length 1 or 2.
     // Length 1: A, S, t
     // Length 2: (p/d/c)#, (P/D/C)#
@@ -57,9 +58,11 @@ private:
     void Process_Input(const string &an_input);
 
     // Interrupr Handler function.
+    // Assumes valid input and device exists
     void Handle_Interrupt(const string &an_input);
 
     // System Call Handler function.
+    // Assumes valid input and device exists.
     void Handle_Sys_Call(const string &an_input);
 
     // Handles A input.
@@ -70,6 +73,13 @@ private:
 
     // Handles S input and subsequent r, p, d, or c.
     void Snapshot();
+
+    void Acquire_Parameters(PCB *a_process, bool is_write_only);
+    bool Is_Valid_Numeric_Input(const string& user_input);
+
+    void Request_Printer(Device *a_printer);
+    void Request_Disk(Device *a_disk);
+    void Request_Optical_Drive(Device *an_optical_drive);
 
     void test();
 };
