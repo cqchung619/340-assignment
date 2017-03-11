@@ -50,5 +50,6 @@ OS SystemGenerator::Generate_OS() {
     OS an_OS{};
     an_OS.Initialize_Devices(device_count);
 
+    cout << "System installed.\n" << endl;
     return an_OS;
 }

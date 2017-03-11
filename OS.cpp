@@ -24,6 +24,20 @@ void OS::Initialize_Devices(const vector<unsigned int> &device_count) {
     }
 }
 
+void OS::Run() {
+    while (running_) {
+        cout << "> ";
+        string input = "";
+        getline(cin, input);
+
+        if (Is_Valid_Signal_Input(input)) {
+            Process_Input(input);
+        } else {
+            cout << "Invalid\n" << endl;;
+        }
+    }
+}
+
 bool OS::Is_Valid_Signal_Input(const string &an_input) {
     size_t input_length = an_input.length();
     bool is_valid = false;
@@ -53,6 +67,7 @@ bool OS::Is_Valid_Signal_Input(const string &an_input) {
     } else if (an_input == "EXIT" || an_input == "exit") {
         is_valid = true;
     }
+
     return is_valid;
 }
 
@@ -87,6 +102,7 @@ void OS::Handle_Interrupt(const string &an_input) {
     switch (an_input[0]) {
         case 'A':
             Create_Process();
+            cout << "Process created.\n";
             break;
         case 'S':
             Snapshot();
@@ -95,24 +111,29 @@ void OS::Handle_Interrupt(const string &an_input) {
             if (device_table_["printers"].find(temp)->second->Is_Idle()) {
                 break;
             } else {
-                cout << "Device finished" << endl;
+                Signal_Device_Completion(device_table_["printers"].find(temp)->second);
+                cout << "Current printer process complete.\n";
             }
             break;
         case 'D':
             if (device_table_["disks"].find(temp)->second->Is_Idle()) {
                 break;
             } else {
-                cout << "Device finished" << endl;
+                Signal_Device_Completion(device_table_["disks"].find(temp)->second);
+                cout << "Current disk process complete.\n";
             }
             break;
         case 'C':
             if (device_table_["CD/RWs"].find(temp)->second->Is_Idle()) {
                 break;
             } else {
-                cout << "Device finished" << endl;
+                Signal_Device_Completion(device_table_["CD/RWs"].find(temp)->second);
+                cout << "Current CD/RW process complete.\n";
             }
             break;
     }
+
+    cout << endl;
 }
 
 void OS::Create_Process() {
@@ -171,26 +192,41 @@ void OS::Snapshot() {
     }
 }
 
+void OS::Signal_Device_Completion(Device *a_device) {
+    PCB *finished_process = a_device->Remove_Running_Process();
+    finished_process->Clear_Params();
+    ready_queue_->enqueue(finished_process);
+    if (cpu_->Is_Idle()) {
+        cpu_->Bind_Process(ready_queue_->front());
+    }
+}
+
 void OS::Handle_Sys_Call(const string &an_input) {
     if (cpu_->Is_Idle()) {
-        cout << "Error: No running process" << endl;
+        cout << "Error: No running process.\n" << endl;
         return;
     }
 
     switch (an_input[0]) {
         case 't':
             Terminate_Running_Process();
+            cout << "Process terminated.\n";
             break;
         case 'p':
             Request_Printer(device_table_["printers"].find(an_input)->second);
+            cout << "Request handled successfully.\n";
             break;
         case 'd':
             Request_Disk(device_table_["disks"].find(an_input)->second);
+            cout << "Request handled successfully.\n";
             break;
         case 'c':
             Request_Optical_Drive(device_table_["CD/RWs"].find(an_input)->second);
+            cout << "Request handled successfully.\n";
             break;
     }
+
+    cout << endl;
 }
 
 void OS::Terminate_Running_Process() {
@@ -294,20 +330,6 @@ void OS::Request_Optical_Drive(Device *an_optical_drive) {
     // Bind next process to CPU if available.
     if (!ready_queue_->empty()) {
         cpu_->Bind_Process(ready_queue_->front());
-    }
-}
-
-void OS::Run() {
-    while (running_) {
-        cout << "> ";
-        string input = "";
-        getline(cin, input);
-
-        if (Is_Valid_Signal_Input(input)) {
-            Process_Input(input);
-        } else {
-            cout << "Invalid\n";
-        }
     }
 }
 

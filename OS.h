@@ -12,9 +12,7 @@ Assignment #1: Basic data structures of OS
 #include "Device.h"
 #include "PCB.h"
 #include "PCBQueue.h"
-#include "Scheduler.h"
 
-#include <algorithm>
 #include <iostream>
 #include <map>
 using namespace std;
@@ -74,12 +72,24 @@ private:
     // Handles S input and subsequent r, p, d, or c.
     void Snapshot();
 
+    // Prompts for 4 inputs:
+    // filename, memstart, R/W, file length.
     void Acquire_Parameters(PCB *a_process, bool is_write_only);
+
+    // Validates a non-empty, numeric input.
     bool Is_Valid_Numeric_Input(const string& user_input);
 
+    // Handles S -> p.
     void Request_Printer(Device *a_printer);
+
+    // Handles S -> d.
     void Request_Disk(Device *a_disk);
+
+    // Handles S -> c.
     void Request_Optical_Drive(Device *an_optical_drive);
+
+    // Handles (P/D/C)#.
+    void Signal_Device_Completion(Device *a_device);
 
     void test();
 };
