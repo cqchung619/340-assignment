@@ -16,6 +16,7 @@ using namespace std;
 class CPU {
 public:
     CPU(): running_process_{nullptr} {}
+    ~CPU() { delete running_process_; }
 
     // Add process to the back of the queue.
     void Bind_Process(PCB *a_process) { running_process_ = a_process; }
