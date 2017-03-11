@@ -16,7 +16,12 @@ using namespace std;
 class CPU {
 public:
     CPU(): running_process_{nullptr} {}
-    ~CPU() { delete running_process_; }
+    // We don't delete running_process_ because it points to the same object as the first item of the ready_queue_.
+    // The ready_queue_'s destructor will handle its deletion.
+    ~CPU() { running_process_ = nullptr; }
+
+    // Returns true if running_process_ is null (CPU is not executing a process), otherwise returns false.
+    bool Is_Idle() { return running_process_ == nullptr; }
 
     // Add process to the back of the queue.
     void Bind_Process(PCB *a_process) { running_process_ = a_process; }

@@ -25,8 +25,10 @@ public:
     ~OS() {
         delete cpu_;
         delete ready_queue_;
-        for (auto item : device_table_) {
-            delete item.second;
+        for (auto table : device_table_) {
+            for (auto item : table.second) {
+                delete item.second;
+            }
         }
     }
 
@@ -41,15 +43,17 @@ private:
     unsigned int PID_counter_;
     CPU *cpu_;
     PCBQueue* ready_queue_;
-    map<string, Device*> device_table_;
+    map<string, map<string, Device*>> device_table_;
 
     // Input validator for interrupts and system calls.
     // Valid only if length 1 or 2.
     // Length 1: A, S, t
-    // Length 2: (p/c/d)#, (P/C/D)#
+    // Length 2: (p/d/c)#, (P/D/C)#
     bool Is_Valid_Signal_Input(const string &an_input);
 
     // Processes the input to determine if the Interrupr Handler or the System Call Handler should be used.
+    // Interrupt: A, S (P/D/C)#
+    // System Call: t, (p/d/c)#
     void Process_Input(const string &an_input);
 
     // Interrupr Handler function.
@@ -58,9 +62,14 @@ private:
     // System Call Handler function.
     void Handle_Sys_Call(const string &an_input);
 
+    // Handles A input.
     void Create_Process();
-    void Snapshot();
+
+    // Handles t input.
     void Terminate_Running_Process();
+
+    // Handles S input and subsequent r, p, d, or c.
+    void Snapshot();
 
     void test();
 };

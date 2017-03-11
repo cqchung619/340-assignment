@@ -3,11 +3,11 @@
 void PCB::Output_PCB(ostream &out, OutputFormat format) const{
     switch (format) {
         case CPU:
-            out << left
+            out << right
                 << setw(5) << PID_;
             break;
         case DEVICE:
-            out << left
+            out << right
                 << setw(5) << PID_
                 << setw(20) << parameters_[0]
                 << setw(10) << parameters_[1]
