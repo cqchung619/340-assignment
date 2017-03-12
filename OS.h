@@ -72,9 +72,20 @@ private:
     // Handles S input and subsequent r, p, d, or c.
     void Snapshot();
 
-    // Prompts for 4 inputs:
+    // Prompts for printer parameters:
+    // filename, memstart, file length.
+    // Printer is always write.
+    void Acquire_Printer_Parameters(PCB *a_process);
+
+    // Prompts for disk parameters:
     // filename, memstart, R/W, file length.
-    void Acquire_Parameters(PCB *a_process, bool is_write_only);
+    // If R, file length is empty.
+    void Acquire_Disk_Parameters(PCB *a_process);
+
+    // Prompts for CD/RW parameters:
+    // filename, memstart, R/W, file length.
+    // If R, file length is empty.
+    void Acquire_Optical_Drive_Parameters(PCB *a_process);
 
     // Validates a non-empty, numeric input.
     bool Is_Valid_Numeric_Input(const string& user_input);

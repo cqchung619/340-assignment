@@ -238,7 +238,52 @@ void OS::Terminate_Running_Process() {
     }
 }
 
-void OS::Acquire_Parameters(PCB *a_process, bool is_write_only) {
+void OS::Request_Printer(Device *a_printer) {
+    // Unbind process from CPU and remove from ready_queue_.
+    cpu_->Unbind_Process();
+    PCB *calling_process = ready_queue_->dequeue();
+
+    // Get parameters and add to device queue.
+    Acquire_Printer_Parameters(calling_process);
+    a_printer->Add_Process(calling_process);
+
+    // Bind next process to CPU if available.
+    if (!ready_queue_->empty()) {
+        cpu_->Bind_Process(ready_queue_->front());
+    }
+}
+
+void OS::Request_Disk(Device *a_disk) {
+    // Unbind process from CPU and remove from ready_queue_.
+    cpu_->Unbind_Process();
+    PCB *calling_process = ready_queue_->dequeue();
+
+    // Get parameters and add to device queue.
+    Acquire_Disk_Parameters(calling_process);
+    a_disk->Add_Process(calling_process);
+
+    // Bind next process to CPU if available.
+    if (!ready_queue_->empty()) {
+        cpu_->Bind_Process(ready_queue_->front());
+    }
+}
+
+void OS::Request_Optical_Drive(Device *an_optical_drive) {
+    // Unbind process from CPU and remove from ready_queue_.
+    cpu_->Unbind_Process();
+    PCB *calling_process = ready_queue_->dequeue();
+
+    // Get parameters and add to device queue.
+    Acquire_Optical_Drive_Parameters(calling_process);
+    an_optical_drive->Add_Process(calling_process);
+
+    // Bind next process to CPU if available.
+    if (!ready_queue_->empty()) {
+        cpu_->Bind_Process(ready_queue_->front());
+    }
+}
+
+void OS::Acquire_Printer_Parameters(PCB *a_process) {
     string param = "";
 
     // Filename
@@ -256,15 +301,8 @@ void OS::Acquire_Parameters(PCB *a_process, bool is_write_only) {
     a_process->Add_Param(param);
 
     // R/W
-    if (is_write_only) {
-        a_process->Add_Param("W");
-    } else {
-        do {
-            cout << "Is this a read or write (R/W)?\n> ";
-            getline(cin, param);
-        } while (param == "" || (param != "R" && param != "W"));
-        a_process->Add_Param(param);
-    }
+    param = "W";
+    a_process->Add_Param(param);
 
     // File Length
     do {
@@ -273,6 +311,83 @@ void OS::Acquire_Parameters(PCB *a_process, bool is_write_only) {
     } while (param == "" || !Is_Valid_Numeric_Input(param));
     a_process->Add_Param(param);
 }
+
+void OS::Acquire_Disk_Parameters(PCB *a_process) {
+    string param = "";
+
+    // Filename
+    do {
+        cout << "What is the filename?\n> ";
+        getline(cin, param);
+    } while (param == "");
+    a_process->Add_Param(param);
+
+    // Memstart
+    do {
+        cout << "Where is the memstart location (numerical)?\n> ";
+        getline(cin, param);
+    } while (param == "" || !Is_Valid_Numeric_Input(param));
+    a_process->Add_Param(param);
+
+    // R/W
+    do {
+        cout << "Is this a read or write (r/w)?\n> ";
+        getline(cin, param);
+        param = toupper(param[0]);
+    } while (param == "" || (param != "R" && param != "W"));
+    a_process->Add_Param(param);
+
+    // File Length
+    if (param == "W") {
+        do {
+            cout << "What is the file length (numerical)?\n> ";
+            getline(cin, param);
+        } while (param == "" || !Is_Valid_Numeric_Input(param));
+        a_process->Add_Param(param);
+    } else {
+        param = "";
+        a_process->Add_Param(param);
+    }
+}
+
+void OS::Acquire_Optical_Drive_Parameters(PCB *a_process) {
+    string param = "";
+
+    // Filename
+    do {
+        cout << "What is the filename?\n> ";
+        getline(cin, param);
+    } while (param == "");
+    a_process->Add_Param(param);
+
+    // Memstart
+    do {
+        cout << "Where is the memstart location (numerical)?\n> ";
+        getline(cin, param);
+    } while (param == "" || !Is_Valid_Numeric_Input(param));
+    a_process->Add_Param(param);
+
+    // R/W
+    do {
+        cout << "Is this a read or write (r/w)?\n> ";
+        getline(cin, param);
+        param = toupper(param[0]);
+    } while (param == "" || (param != "R" && param != "W"));
+    a_process->Add_Param(param);
+
+    // File Length
+    if (param == "W") {
+        do {
+            cout << "What is the file length (numerical)?\n> ";
+            getline(cin, param);
+        } while (param == "" || !Is_Valid_Numeric_Input(param));
+        a_process->Add_Param(param);
+    } else {
+        param = "";
+        a_process->Add_Param(param);
+    }
+}
+
 
 bool OS::Is_Valid_Numeric_Input(const string& user_input) {
     if (user_input == "") {
@@ -286,51 +401,6 @@ bool OS::Is_Valid_Numeric_Input(const string& user_input) {
     }
 
     return true;
-}
-
-void OS::Request_Printer(Device *a_printer) {
-    // Unbind process from CPU and remove from ready_queue_.
-    cpu_->Unbind_Process();
-    PCB *calling_process = ready_queue_->dequeue();
-
-    // Get parameters and add to device queue.
-    Acquire_Parameters(calling_process, true);
-    a_printer->Add_Process(calling_process);
-
-    // Bind next process to CPU if available.
-    if (!ready_queue_->empty()) {
-        cpu_->Bind_Process(ready_queue_->front());
-    }
-}
-
-void OS::Request_Disk(Device *a_disk) {
-    // Unbind process from CPU and remove from ready_queue_.
-    cpu_->Unbind_Process();
-    PCB *calling_process = ready_queue_->dequeue();
-
-    // Get parameters and add to device queue.
-    Acquire_Parameters(calling_process, false);
-    a_disk->Add_Process(calling_process);
-
-    // Bind next process to CPU if available.
-    if (!ready_queue_->empty()) {
-        cpu_->Bind_Process(ready_queue_->front());
-    }
-}
-
-void OS::Request_Optical_Drive(Device *an_optical_drive) {
-    // Unbind process from CPU and remove from ready_queue_.
-    cpu_->Unbind_Process();
-    PCB *calling_process = ready_queue_->dequeue();
-
-    // Get parameters and add to device queue.
-    Acquire_Parameters(calling_process, false);
-    an_optical_drive->Add_Process(calling_process);
-
-    // Bind next process to CPU if available.
-    if (!ready_queue_->empty()) {
-        cpu_->Bind_Process(ready_queue_->front());
-    }
 }
 
 void OS::test() {
