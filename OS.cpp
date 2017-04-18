@@ -162,7 +162,10 @@ void OS::Snapshot() {
     if (an_input == "r") {
         cout << "---Ready Queue---" << endl;
         cout << right
-             << setw(5) << "PID" << endl;
+             << setw(5) << "PID"
+             << setw(15) << " CPU_USAGE_TIME"
+             << setw(15) << " AVG_BURST_TIME"
+             << endl;
         ready_queue_->Output_Processes(cout, PCB::CPU);
     } else {
         cout << right
@@ -173,7 +176,10 @@ void OS::Snapshot() {
              << setw(10) << "MEMSTART"
              << setw(5) << "R/W"
              << left
-             << setw(20) << " FILE_LENGTH" << endl;
+             << setw(20) << " FILE_LENGTH"
+             << setw(15) << " CPU_USAGE_TIME"
+             << setw(15) << " AVG_BURST_TIME"
+             << endl;
 
         switch (an_input[0]) {
             case 'p':

@@ -37,6 +37,9 @@ public:
         }
     }
 
+    void Set_History_Alpha(const double alpha) { history_alpha_ = alpha; }
+    void Set_Burst_Tau(const double tau) { burst_tau_ = tau; }
+
     void Initialize_Printers(const unsigned int number_of_printers);
     void Initialize_Disks(const vector<unsigned int> &number_of_disks);
     void Initialize_CDs(const unsigned int number_of_CDs);
@@ -46,6 +49,8 @@ public:
 private:
     bool running_;
     unsigned int PID_counter_;
+    double history_alpha_; // Between 0 and 1.
+    double burst_tau_; // milliseconds.
     CPU *cpu_;
     PCBQueue* ready_queue_;
     map<string, Printer*> printer_table_;
