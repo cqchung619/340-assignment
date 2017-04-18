@@ -5,7 +5,9 @@
 
 class Printer: public Device {
 public:
-    Printer(const string &a_name): name_{a_name}, process_queue_{new PCBQueue} {}
+    Printer(const string &a_name): Device::Device{a_name} {}
+
+    virtual ~Printer() {}
 private:
 };
 

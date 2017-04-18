@@ -17,7 +17,8 @@ using namespace std;
 
 class Device {
 public:
-    virtual Device(const string &a_name): name_{a_name}, process_queue_{new PCBQueue} {}
+    Device(const string &a_name): name_{a_name}, process_queue_{new PCBQueue} {}
+    virtual ~Device() {}
 
     // Returns true if process_queue_ is empty (Device has no requests), otherwise returns false.
     bool Is_Idle() { return process_queue_->empty(); }
