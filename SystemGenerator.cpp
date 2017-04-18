@@ -51,7 +51,8 @@ void SystemGenerator::Generate_Disks(OS &an_OS) {
     }
 
     // Number of cylinders per disk.
-    vector<unsigned int> disk_cylinder_count{stoi(number_of_devices)};
+    vector<unsigned int> disk_cylinder_count( (unsigned int) stoi(number_of_devices) );
+    cout << disk_cylinder_count.size() << endl;
     for (size_t i = 0; i < disk_cylinder_count.size(); ++i) {
         string number_of_cylinders = "";
 
@@ -62,7 +63,7 @@ void SystemGenerator::Generate_Disks(OS &an_OS) {
             getline(cin, number_of_cylinders);
         }
 
-        disk_cylinder_count[i] = number_of_cylinders;
+        disk_cylinder_count[i] = (unsigned int) stoi(number_of_cylinders);
     }
 
     an_OS.Initialize_Disks(disk_cylinder_count);

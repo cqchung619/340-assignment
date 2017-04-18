@@ -1,26 +1,27 @@
 #include "OS.h"
 
-void OS::Initialize_Devices(const vector<unsigned int> &device_count) {
-    unsigned int number_of_printers = device_count[0];
-    unsigned int number_of_disks = device_count[1];
-    unsigned int number_of_optical_drives = device_count[2];
-
+void OS::Initialize_Printers(const unsigned int number_of_printers) {
     for (unsigned int i = 0; i < number_of_printers; ++i) {
         string name = "p" + to_string(i);
-        Device *printer = new Device{name};
-        device_table_["printers"].insert(std::pair<string, Device*>{name, printer});
+        Printer *printer = new Printer{name};
+        printer_table_.insert(std::pair<string, Printer*>{name, printer});
     }
+}
 
-    for (unsigned int i = 0; i < number_of_disks; ++i) {
+void OS::Initialize_Disks(const vector<unsigned int> &number_of_disks) {
+    for (unsigned int i = 0; i < number_of_disks.size(); ++i) {
         string name = "d" + to_string(i);
-        Device *disk = new Device{name};
-        device_table_["disks"].insert(std::pair<string, Device*>{name, disk});
+        unsigned int cylinder_count = number_of_disks[i];
+        Disk *disk = new Disk{name, cylinder_count};
+        disk_table_.insert(std::pair<string, Disk*>{name, disk});
     }
+}
 
-    for (unsigned int i = 0; i < number_of_optical_drives; ++i) {
+void OS::Initialize_CDs(const unsigned int number_of_CDs) {
+    for (unsigned int i = 0; i < number_of_CDs; ++i) {
         string name = "c" + to_string(i);
-        Device *optical_drive = new Device{name};
-        device_table_["CD/RWs"].insert(std::pair<string, Device*>{name, optical_drive});
+        CD *cd = new CD{name};
+        cd_table_.insert(std::pair<string, CD*>{name, cd});
     }
 }
 
@@ -42,30 +43,32 @@ bool OS::Is_Valid_Signal_Input(const string &an_input) {
     size_t input_length = an_input.length();
     bool is_valid = false;
 
-    if (input_length == 1) { // A, S, t
-        is_valid = an_input == "A" || an_input == "S" || an_input == "t";
-    } else if (input_length == 2) { // (P/D/C)#, (p/d/c)#
-        if (isalpha(an_input[0]) && isdigit(an_input[1])) { // (letter)(number)
-            // true if an_input found, otherwise false (Device does not exist).
-            if (isupper(an_input[0])) { // Device names start with lowercase letters.
-                string temp = "";
-                temp += tolower(an_input[0]);
-                temp += an_input[1];
-                for (auto table : device_table_) {
-                    if (table.second.count(temp) != 0) {
-                        is_valid = true;
-                    }
+    switch(input_length) {
+        case 1: // A, S, t
+            is_valid = an_input == "A" || an_input == "S" || an_input == "t";
+            break;
+        case 2: { // (P/D/C)#, (p/d/c)#
+            if (isalpha(an_input[0]) && isdigit(an_input[1])) { // (letter)(number)
+                string temp = an_input;
+
+                // Check if the device exists.
+                if (isupper(an_input[0])) { // If uppercase convert to lowercase
+                    temp[0] = tolower(an_input[0]);
                 }
-            } else {
-                for (auto table : device_table_) {
-                    if (table.second.count(an_input) != 0) {
-                        is_valid  = true;
-                    }
-                }
+
+                is_valid = printer_table_.count(temp) != 0 ||
+                           disk_table_.count(temp) != 0 ||
+                           cd_table_.count(temp) != 0;
             }
+
+            break;
         }
-    } else if (an_input == "EXIT" || an_input == "exit") {
-        is_valid = true;
+        default:
+            if (an_input == "EXIT" || an_input == "exit") {
+                is_valid = true;
+            }
+
+            break;
     }
 
     return is_valid;
@@ -108,26 +111,26 @@ void OS::Handle_Interrupt(const string &an_input) {
             Snapshot();
             break;
         case 'P':
-            if (device_table_["printers"].find(temp)->second->Is_Idle()) {
+            if (printer_table_.find(temp)->second->Is_Idle()) {
                 break;
             } else {
-                Signal_Device_Completion(device_table_["printers"].find(temp)->second);
+                Signal_Device_Completion(printer_table_.find(temp)->second);
                 cout << "Current printer process complete.\n";
             }
             break;
         case 'D':
-            if (device_table_["disks"].find(temp)->second->Is_Idle()) {
+            if (disk_table_.find(temp)->second->Is_Idle()) {
                 break;
             } else {
-                Signal_Device_Completion(device_table_["disks"].find(temp)->second);
+                Signal_Device_Completion(disk_table_.find(temp)->second);
                 cout << "Current disk process complete.\n";
             }
             break;
         case 'C':
-            if (device_table_["CD/RWs"].find(temp)->second->Is_Idle()) {
+            if (cd_table_.find(temp)->second->Is_Idle()) {
                 break;
             } else {
-                Signal_Device_Completion(device_table_["CD/RWs"].find(temp)->second);
+                Signal_Device_Completion(cd_table_.find(temp)->second);
                 cout << "Current CD/RW process complete.\n";
             }
             break;
@@ -174,18 +177,18 @@ void OS::Snapshot() {
 
         switch (an_input[0]) {
             case 'p':
-                for (auto printer : device_table_["printers"]) {
+                for (auto printer : printer_table_) {
                     cout << *(printer.second);
                 }
                 break;
             case 'd':
-                for (auto disk : device_table_["disks"]) {
+                for (auto disk : disk_table_) {
                     cout << *(disk.second);
                 }
                 break;
             case 'c':
-                for (auto optical_drive : device_table_["CD/RWs"]) {
-                    cout << *(optical_drive.second);
+                for (auto cd : cd_table_) {
+                    cout << *(cd.second);
                 }
                 break;
         }
@@ -213,15 +216,15 @@ void OS::Handle_Sys_Call(const string &an_input) {
             cout << "Process terminated.\n";
             break;
         case 'p':
-            Request_Printer(device_table_["printers"].find(an_input)->second);
+            Request_Printer(printer_table_.find(an_input)->second);
             cout << "Request handled successfully.\n";
             break;
         case 'd':
-            Request_Disk(device_table_["disks"].find(an_input)->second);
+            Request_Disk(disk_table_.find(an_input)->second);
             cout << "Request handled successfully.\n";
             break;
         case 'c':
-            Request_Optical_Drive(device_table_["CD/RWs"].find(an_input)->second);
+            Request_Optical_Drive(cd_table_.find(an_input)->second);
             cout << "Request handled successfully.\n";
             break;
     }

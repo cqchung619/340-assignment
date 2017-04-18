@@ -8,10 +8,13 @@ Assignment #1: Basic data structures of OS
 #ifndef OS_H
 #define OS_H
 
+#include "CD.h"
 #include "CPU.h"
 #include "Device.h"
+#include "Disk.h"
 #include "PCB.h"
 #include "PCBQueue.h"
+#include "Printer.h"
 
 #include <iostream>
 #include <map>
@@ -23,16 +26,20 @@ public:
     ~OS() {
         delete cpu_;
         delete ready_queue_;
-        for (auto table : device_table_) {
-            for (auto item : table.second) {
-                delete item.second;
-            }
+        for (auto printer : printer_table_) {
+            delete printer.second;
+        }
+        for (auto disk : disk_table_) {
+            delete disk.second;
+        }
+        for (auto cd : cd_table_) {
+            delete cd   .second;
         }
     }
 
-    // @device_count: Holds the number of each devie to be created.
-    //                Order of the numbers is printer, disk, CD/RW.
-    void Initialize_Devices(const vector<unsigned int> &device_count);
+    void Initialize_Printers(const unsigned int number_of_printers);
+    void Initialize_Disks(const vector<unsigned int> &number_of_disks);
+    void Initialize_CDs(const unsigned int number_of_CDs);
 
     void Run();
 
@@ -41,7 +48,9 @@ private:
     unsigned int PID_counter_;
     CPU *cpu_;
     PCBQueue* ready_queue_;
-    map<string, map<string, Device*>> device_table_;
+    map<string, Printer*> printer_table_;
+    map<string, Disk*> disk_table_;
+    map<string, CD*> cd_table_;
 
     // Input validator for interrupts and system calls.
     // Verifies that device exists.
