@@ -18,6 +18,8 @@ private:
     void Generate_Printers(OS &an_OS);
     void Generate_Disks(OS &an_OS);
     void Generate_CDs(OS &an_OS);
+
+    void Set_Initial_CPU_Scheduling_Values(OS &an_OS);
 };
 
 #endif

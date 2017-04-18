@@ -22,6 +22,8 @@ OS SystemGenerator::Generate_OS() {
     Generate_Disks(an_OS);
     Generate_CDs(an_OS);
 
+    Set_Initial_CPU_Scheduling_Values(an_OS);
+
     cout << "System installed.\n" << endl;
     return an_OS;
 }
@@ -52,7 +54,6 @@ void SystemGenerator::Generate_Disks(OS &an_OS) {
 
     // Number of cylinders per disk.
     vector<unsigned int> disk_cylinder_count( (unsigned int) stoi(number_of_devices) );
-    cout << disk_cylinder_count.size() << endl;
     for (size_t i = 0; i < disk_cylinder_count.size(); ++i) {
         string number_of_cylinders = "";
 
@@ -80,4 +81,28 @@ void SystemGenerator::Generate_CDs(OS &an_OS) {
     }
 
     an_OS.Initialize_CDs(stoi(number_of_devices));
+}
+
+void SystemGenerator::Set_Initial_CPU_Scheduling_Values(OS &an_OS) {
+    string input = "";
+
+    cout << "What is the history parameter alpha?\n> ";
+    getline(cin, input);
+    // Short-circuiting: Right side is evaluated only if input is a valid numeric input.
+    // O <= alpha <= 1
+    while ( !Is_Valid_Numeric_Input(input) || ((double) stoi(input) > 1) ) {
+        cout << "Invalid input. Alpha should be a number within 0 and 1:\n> ";
+        getline(cin, input);
+    }
+    an_OS.Set_History_Alpha( (double) stoi(input) );
+
+    cout << "What is the initial burst tau (in milliseconds)?\n> ";
+    getline(cin, input);
+    // Short-circuiting: Right side is evaluated only if input is a valid numeric input.
+    // O <= alpha <= 1
+    while ( !Is_Valid_Numeric_Input(input) ) {
+        cout << "Invalid input. Tau should be a positive number:\n> ";
+        getline(cin, input);
+    }
+    an_OS.Set_Burst_Tau( (double) stoi(input) );
 }
