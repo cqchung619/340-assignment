@@ -5,6 +5,7 @@
 
 class CD: public Device {
 public:
+    CD(const string &a_name): name_{a_name}, process_queue_{new PCBQueue} {}
 private:
 };
 

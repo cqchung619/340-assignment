@@ -17,7 +17,7 @@ using namespace std;
 
 class Device {
 public:
-    Device(const string &a_name): name_{a_name}, process_queue_{new PCBQueue} {}
+    virtual Device(const string &a_name): name_{a_name}, process_queue_{new PCBQueue} {}
 
     // Returns true if process_queue_ is empty (Device has no requests), otherwise returns false.
     bool Is_Idle() { return process_queue_->empty(); }
@@ -26,7 +26,7 @@ public:
     const string &Get_Name() const { return name_; }
 
     // Add process to the back of the queue.
-    void Add_Process(PCB *a_process) { process_queue_->enqueue(a_process); }
+    virtual void Add_Process(PCB *a_process) { process_queue_->enqueue(a_process); }
 
     // Remove and returns the process in the front of the queue.
     // Assumes queue is non-empty.
