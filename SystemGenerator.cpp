@@ -15,41 +15,68 @@ bool SystemGenerator::Is_Valid_Numeric_Input(const string& user_input) {
 }
 
 OS SystemGenerator::Generate_OS() {
-    vector<unsigned int> device_count;
+    OS an_OS{};
     cout << "System Installation: " << endl;
 
-    string number_of_device = "";
-
-    // Printers generation.
-    cout << "How many printers will be installed?\n> ";
-    getline(cin, number_of_device);
-    while (!Is_Valid_Numeric_Input(number_of_device)) {
-        cout << "Invalid input. Please enter a valid number:\n> ";
-        getline(cin, number_of_device);
-    }
-    device_count.push_back(stoi(number_of_device));
-
-    // Disks generation.
-    cout << "How many disks will be installed?\n> ";
-    getline(cin, number_of_device);
-    while (!Is_Valid_Numeric_Input(number_of_device)) {
-        cout << "Invalid input. Please enter a valid number:\n> ";
-        getline(cin, number_of_device);
-    }
-    device_count.push_back(stoi(number_of_device));
-
-    // CD/RWs generation.
-    cout << "How many CD/RWs will be installed?\n> ";
-    getline(cin, number_of_device);
-    while (!Is_Valid_Numeric_Input(number_of_device)) {
-        cout << "Invalid input. Please enter a valid number:\n> ";
-        getline(cin, number_of_device);
-    }
-    device_count.push_back(stoi(number_of_device));
-
-    OS an_OS{};
-    an_OS.Initialize_Devices(device_count);
+    Generate_Printers(an_OS);
+    Generate_Disks(an_OS);
+    Generate_CDs(an_OS);
 
     cout << "System installed.\n" << endl;
     return an_OS;
+}
+
+void SystemGenerator::Generate_Printers(OS &an_OS) {
+    string number_of_devices = "";
+
+    cout << "How many printers will be installed?\n> ";
+    getline(cin, number_of_devices);
+    while (!Is_Valid_Numeric_Input(number_of_devices)) {
+        cout << "Invalid input. Please enter a valid number:\n> ";
+        getline(cin, number_of_devices);
+    }
+
+    an_OS.Initialize_Printers(stoi(number_of_devices));
+}
+
+void SystemGenerator::Generate_Disks(OS &an_OS) {
+    string number_of_devices = "";
+
+    // Number of disks.
+    cout << "How many disks will be installed?\n> ";
+    getline(cin, number_of_devices);
+    while (!Is_Valid_Numeric_Input(number_of_devices)) {
+        cout << "Invalid input. Please enter a valid number:\n> ";
+        getline(cin, number_of_devices);
+    }
+
+    // Number of cylinders per disk.
+    vector<unsigned int> disk_cylinder_count{stoi(number_of_devices)};
+    for (size_t i = 0; i < disk_cylinder_count.size(); ++i) {
+        string number_of_cylinders = "";
+
+        cout << "How many cylinders does disk "<< i << " have?\n> ";
+        getline(cin, number_of_cylinders);
+        while (!Is_Valid_Numeric_Input(number_of_cylinders)) {
+            cout << "Invalid input. Please enter a valid number:\n> ";
+            getline(cin, number_of_cylinders);
+        }
+
+        disk_cylinder_count[i] = number_of_cylinders;
+    }
+
+    an_OS.Initialize_Disks(disk_cylinder_count);
+}
+
+void SystemGenerator::Generate_CDs(OS &an_OS) {
+    string number_of_devices = "";
+
+    cout << "How many CD/RWs will be installed?\n> ";
+    getline(cin, number_of_devices);
+    while (!Is_Valid_Numeric_Input(number_of_devices)) {
+        cout << "Invalid input. Please enter a valid number:\n> ";
+        getline(cin, number_of_devices);
+    }
+
+    an_OS.Initialize_CDs(stoi(number_of_devices));
 }

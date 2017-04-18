@@ -14,6 +14,10 @@ public:
 
 private:
     bool Is_Valid_Numeric_Input(const string& user_input);
+
+    void Generate_Printers(OS &an_OS);
+    void Generate_Disks(OS &an_OS);
+    void Generate_CDs(OS &an_OS);
 };
 
 #endif
