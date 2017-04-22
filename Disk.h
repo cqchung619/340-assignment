@@ -1,3 +1,10 @@
+/*
+Author: Cuong Chung
+Course: CSCI 34000
+Instructor: Eric Schweitzer
+Assignment #2: Pre-Emptive SJF, Disk Scheduling and Accounting
+*/
+
 #ifndef DISK_H
 #define DISK_H
 

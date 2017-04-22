@@ -2,7 +2,7 @@
 Author: Cuong Chung
 Course: CSCI 34000
 Instructor: Eric Schweitzer
-Assignment #1: Basic data structures of OS
+Assignment #2: Pre-Emptive SJF, Disk Scheduling and Accounting
 */
 
 #ifndef PCB_QUEUE_H

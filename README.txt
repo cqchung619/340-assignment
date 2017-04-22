@@ -1,5 +1,5 @@
 ﻿Cuong Chung
-CSCI 34000 – Assignment #1 README
+CSCI 34000 – Assignment #2 README
 Prof. Eric Schweitzer
 
 This programm is a simulation of the basic handling of data structures in an OS.
