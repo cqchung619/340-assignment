@@ -3,7 +3,7 @@ LFLAGS = -std=c++11
 CFLAGS = -c -Wall
 
 # Edit the following SOURCES variable to include all of the .cpp files to compile
-SOURCES = main.cpp SystemGenerator.cpp OS.cpp CPU.cpp Device.cpp Printer.cpp Disk.cpp CD.cpp PCB.cpp PCBQueue.cpp ReadyQueue.cpp
+SOURCES = main.cpp SystemGenerator.cpp OS.cpp CPU.cpp Device.cpp Printer.cpp Disk.cpp CD.cpp PCB.cpp PCBQueue.cpp ReadyQueue.cpp DiskQueue.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 EXECUTABLE_NAME = ~/temp/run.me
 EXECUTABLE_NAME2 = run
