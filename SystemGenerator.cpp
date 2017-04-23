@@ -38,6 +38,7 @@ void SystemGenerator::Generate_Printers(OS &an_OS) {
         cout << "Invalid input. Please enter a valid number:\n> ";
         getline(cin, number_of_devices);
     }
+    cout << endl;
 
     an_OS.Initialize_Printers(stoi(number_of_devices));
 }
@@ -67,6 +68,7 @@ void SystemGenerator::Generate_Disks(OS &an_OS) {
 
         disk_cylinder_count[i] = (unsigned int) stoi(number_of_cylinders);
     }
+    cout << endl;
 
     an_OS.Initialize_Disks(disk_cylinder_count);
 }
@@ -80,30 +82,43 @@ void SystemGenerator::Generate_CDs(OS &an_OS) {
         cout << "Invalid input. Please enter a valid number:\n> ";
         getline(cin, number_of_devices);
     }
+    cout << endl;
 
     an_OS.Initialize_CDs(stoi(number_of_devices));
 }
 
 void SystemGenerator::Set_Initial_CPU_Scheduling_Values(OS &an_OS) {
-    double input = 0;
+    string input = "";
 
+    double alpha = 0;
     cout << "What is the history parameter alpha?\n> ";
-    cin >> input;
-    while ( (!cin.good()) || (input < 0) || (input > 1)) {
-        cout << "Invalid input. Alpha should be a number within 0 and 1:\n> ";
-        cin.clear();
-        cin.ignore(100000, '\n');
-        cin >> input;
-    }
-    an_OS.Set_History_Alpha( input);
+    while (true) {
+        getline(cin, input);
 
-    cout << "What is the initial burst tau (in milliseconds)?\n> ";
-    cin >> input;
-    while ( !cin.good() ) {
-        cout << "Invalid input. Tau should be a positive number:\n> ";
-        cin.clear();
-        cin.ignore(100000, '\n');
-        cin >> input;
+        istringstream double_stream{input};
+        if ( (double_stream >> alpha) && (alpha >= 0) && (alpha <= 1) ) {
+            break;
+        }
+        alpha = 0;
+
+        cout << "Invalid input. Alpha should be a number within 0 and 1:\n> ";
     }
-    an_OS.Set_Initial_Burst_Tau(input);
+    an_OS.Set_History_Alpha(alpha);
+
+    double tau = 0;
+    cout << "What is the initial burst tau (in milliseconds)?\n> ";
+    while (true) {
+        getline(cin, input);
+
+        istringstream double_stream{input};
+        if ( (double_stream >> tau) && (tau > 0) ){
+            break;
+        }
+        tau = 0;
+
+        cout << "Invalid input. Tau should be a positive number:\n> ";
+    }
+    cout << endl;
+
+    an_OS.Set_Initial_Burst_Tau(tau);
 }
