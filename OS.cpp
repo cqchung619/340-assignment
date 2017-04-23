@@ -164,7 +164,9 @@ void OS::Handle_Interrupt(const string &an_input) {
     }
 
     cout << endl;
-    cpu_->Bind_Process(ready_queue_->front());
+    if (!ready_queue_->empty()) {
+        cpu_->Bind_Process(ready_queue_->front());
+    }
 }
 
 void OS::Create_Process() {
@@ -183,33 +185,35 @@ void OS::Snapshot() {
                       an_input == "d" || an_input == "c";
     } while (!valid_input);
 
+    cout << "SYSTEMS AVERAGE CPU TIME: "
+         << ( (number_of_completed_processes_ == 0) ? 0 : (total_cpu_usage_time_ / number_of_completed_processes_) )
+         << endl;
 
     if (an_input == "r") {
         cout << "---Ready Queue---" << endl;
         cout << right
              << setw(5) << "PID"
-             << setw(15) << " CPU_USAGE_TIME"
-             << setw(15) << " AVG_BURST_TIME"
+             << setw(20) << "TOTAL_CPU_TIME"
+             << setw(20) << "AVG_BURST_TIME"
              << endl;
         ready_queue_->Output_Processes(cout, PCB::CPU);
     } else {
         cout << right
-             << setw(5) << "PID"
+             << setw(3) << "PID"
              << left
-             << setw(20) << " FILENAME"
+             << setw(9) << " FILENAME"
              << right
              << setw(10) << "MEMSTART"
              << setw(5) << "R/W"
              << left
-             << setw(20) << " FILE_LENGTH";
+             << setw(13) << "  FILE_LENGTH";
 
         if (an_input == "d") {
-            cout << setw(20) << " CYLINDER_ACCESED";
+            cout << setw(10) << "  DISK_CYL";
         }
 
-        cout << setw(15) << " CPU_USAGE_TIME"
-             << left
-             << setw(15) << " AVG_BURST_TIME"
+        cout << setw(14) << "  CPU_USE_TIME"
+             << setw(16) << "  AVG_BURST_TIME"
              << endl;
 
         switch (an_input[0]) {
@@ -280,6 +284,16 @@ void OS::Handle_Sys_Call(const string &an_input) {
 void OS::Terminate_Running_Process(PCB *process) {
     total_cpu_usage_time_ += process->Get_CPU_Usage_Time();
     ++number_of_completed_processes_;
+
+    cout << "SYSTEM AVERAGE CPU TIME: "
+         << ( (number_of_completed_processes_ == 0) ? 0 : (total_cpu_usage_time_ / number_of_completed_processes_) )
+         << endl;
+
+    cout << "PID: " << process->Get_PID()
+         << "\tTotal CPU time: " << process->Get_CPU_Usage_Time()
+         << "\tAverage burst time: " << process->Get_Average_Burst_Time()
+         << endl;
+
     delete process;
 }
 
@@ -377,11 +391,14 @@ void OS::Acquire_Disk_Parameters(PCB *a_process, Disk *target_disk) {
         if ( (param == "") || (!Is_Valid_Numeric_Input(param)) ) { // Valid numeric input.
             validated = false;
             cout << "Invalid input. Which cylinder will be accessed?\n> ";
-        } else if ( (unsigned int) stoi(param) > target_disk->Get_Cylinder_Count() ) { // Does not exceed cylinder count.
+            getline(cin, param);
+        } else if ( (unsigned int) stoi(param) > target_disk->Get_Cylinder_Count() - 1 ) {
             validated = false;
-            cout << "Invalid cylinder. Which cylinder will be accessed?\n> ";
+            cout << "Invalid cylinder. Which cylinder will be accessed (0 - "
+                 << target_disk->Get_Cylinder_Count() - 1
+                 << ")?\n> ";
+            getline(cin, param);
         }
-        getline(cin, param);
     } while (!validated);
     a_process->Add_Param(param);
 }
@@ -425,16 +442,20 @@ void OS::Acquire_Optical_Drive_Parameters(PCB *a_process) {
 }
 
 double OS::Query_Timer() {
+    string input = "";
+
     double elapsed_time = 0;
-
     cout << "How much time has pass (milliseconds)?\n> ";
-    cin >> elapsed_time;
+    while (true) {
+        getline(cin, input);
 
-    while (!cin.good()) {
-        cout << "Invalid input. How much time has passed?\n";
-        cin.clear();
-        cin.ignore(100000, '\n');;
-        cin >> elapsed_time;
+        istringstream double_stream{input};
+        if ( (double_stream >> elapsed_time) && (elapsed_time >= 0) ){
+            break;
+        }
+        elapsed_time = 0;
+
+        cout << "Invalid input. How much time has passed?\n> ";
     }
 
     return elapsed_time;
