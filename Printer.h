@@ -9,13 +9,32 @@ Assignment #2: Pre-Emptive SJF, Disk Scheduling and Accounting
 #define PRINTER_H
 
 #include "Device.h"
+#include "PCBQueue.h"
 
 class Printer: public Device {
 public:
-    Printer(const string &a_name): Device::Device{a_name} {}
-
+    Printer(const string &a_name): Device::Device{a_name}, process_queue_{new PCBQueue} {}
     virtual ~Printer() {}
+
+    // Returns true if process_queue_ is empty (Device has no requests), otherwise returns false.
+    virtual bool Is_Idle() { return process_queue_->empty(); }
+
+    // Add process to the back of the queue.
+    virtual void Add_Process(PCB *a_process) { process_queue_->enqueue(a_process); }
+
+    // Remove and returns the process in the front of the queue.
+    // Assumes queue is non-empty.
+    virtual PCB *Remove_Running_Process() { return process_queue_->dequeue(); }
+
+    // Returns a const reference to the process in front of the queue.
+    // Assumes queue is non-empty.
+    virtual const PCB *Running_Process() { return process_queue_->front(); }
+
+    // Operator<< overload.
+    friend ostream &operator<<(ostream &out, const Printer &a_printer);
+
 private:
+    PCBQueue *process_queue_;
 };
 
 #endif
