@@ -2,13 +2,13 @@
 
 void DiskQueue::enqueue(PCB *a_process) {
     Node *new_node = new Node{a_process};
-    unsigned int cylinder = new_node->cylinder;
+    unsigned int cylinder = new_node->cylinder_accessed;
 
     Node *temp = queue_head_;
     if (current_size_ == 0) { // Empty queue. Insert and set seek head to new node(immediately process).
         queue_head_ = new_node;
         queue_tail_ = new_node;
-        new_node->next = queue_head_;
+        queue_tail_->next = queue_head_;
         seek_head_ = new_node;
         ++current_size_;
 
@@ -28,7 +28,7 @@ void DiskQueue::enqueue(PCB *a_process) {
     while ( (temp->next->cylinder_accessed <= cylinder) && (temp != queue_tail_) ) {
         // Next node  is seek head (being processed) and cylinder accessed is the same.
         // We insert here behind the seek head.
-        if ( (temp->next == seek_head_) && (cylinder == seek_head->cylinder_accessed) ) {
+        if ( (temp->next == seek_head_) && (cylinder == seek_head_->cylinder_accessed) ) {
             break;
         }
 
@@ -53,12 +53,42 @@ void DiskQueue::enqueue(PCB *a_process) {
 }
 
 PCB *DiskQueue::dequeue() {
-    if (empty()) {
-        return nullptr;
+    PCB *removed_process = seek_head_->process;
+    Node *temp = queue_head_;
+
+    if (current_size_ == 1) { // Single item.
+        queue_head_ = nullptr;
+        queue_tail_ = nullptr;
+        seek_head_ = nullptr;
+    } else if (seek_head_ == queue_head_) { // seek head is at the front.
+        seek_head_ = seek_head_->next;
+        queue_head_ = queue_head_->next;
+        queue_tail_->next = queue_head_;
+    } else {
+        // Move to node before seek head.
+        while ( (temp->next != seek_head_) ) {
+            temp = temp->next;
+        }
+
+        if (seek_head_ == queue_tail_) { // seek head is at the end.
+            seek_head_ = seek_head_->next;
+            queue_tail_ = temp;
+            temp = temp->next;
+            queue_tail_->next = queue_head_;
+        } else { // seek head is within the queue.
+            temp->next = seek_head_->next;
+            temp = seek_head_;
+            seek_head_ = seek_head_->next;
+        }
     }
 
+    // clean up.
+    temp->process = nullptr;
+    temp->next = nullptr;
+    delete temp;
+    --current_size_;
 
-    return a_PCB;
+    return removed_process;
 }
 
 PCB *DiskQueue::front() {
@@ -66,7 +96,7 @@ PCB *DiskQueue::front() {
         return nullptr;
     }
 
-    return process_list_.back();
+    return queue_head_->process;
 }
 
 PCB *DiskQueue::back() {
@@ -74,17 +104,17 @@ PCB *DiskQueue::back() {
         return nullptr;
     }
 
-    return process_list_.front();
+    return queue_tail_->process;
 }
 
 void DiskQueue::Output_Processes(ostream &out, PCB::OutputFormat format) const {
-    // From seek_head to 0.
-    for (size_t i = seek_head_; i >= 0; --i) {
-        process_list_.at(i)->Output_PCB(out, format);
+    if (current_size_ == 0) {
+        return;
     }
 
-    // From size - 1 to seek_head + 1.
-    for (size_t i = process_list_.size() - 1; i >= seek_head_ + 1; --i) {
-        process_list_.at(i)->Output_PCB(out, format);
-    }
+    Node *temp = seek_head_;
+    do {
+        temp->process->Output_PCB(out, format);
+        temp = temp->next;
+    } while (temp != seek_head_);
 }
