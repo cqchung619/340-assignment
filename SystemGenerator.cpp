@@ -25,6 +25,7 @@ OS SystemGenerator::Generate_OS() {
     Set_Initial_CPU_Scheduling_Values(an_OS);
 
     cout << "System installed.\n" << endl;
+    cin.clear();
     return an_OS;
 }
 
@@ -84,25 +85,25 @@ void SystemGenerator::Generate_CDs(OS &an_OS) {
 }
 
 void SystemGenerator::Set_Initial_CPU_Scheduling_Values(OS &an_OS) {
-    string input = "";
+    double input = 0;
 
     cout << "What is the history parameter alpha?\n> ";
-    getline(cin, input);
-    // Short-circuiting: Right side is evaluated only if input is a valid numeric input.
-    // O <= alpha <= 1
-    while ( !Is_Valid_Numeric_Input(input) || ((double) stoi(input) > 1) ) {
+    cin >> input;
+    while ( (!cin.good()) || (input < 0) || (input > 1)) {
         cout << "Invalid input. Alpha should be a number within 0 and 1:\n> ";
-        getline(cin, input);
+        cin.clear();
+        cin.ignore(100000, '\n');
+        cin >> input;
     }
-    an_OS.Set_History_Alpha( (double) stoi(input) );
+    an_OS.Set_History_Alpha( input);
 
     cout << "What is the initial burst tau (in milliseconds)?\n> ";
-    getline(cin, input);
-    // Short-circuiting: Right side is evaluated only if input is a valid numeric input.
-    // O <= alpha <= 1
-    while ( !Is_Valid_Numeric_Input(input) ) {
+    cin >> input;
+    while ( !cin.good() ) {
         cout << "Invalid input. Tau should be a positive number:\n> ";
-        getline(cin, input);
+        cin.clear();
+        cin.ignore(100000, '\n');
+        cin >> input;
     }
-    an_OS.Set_Burst_Tau( (double) stoi(input) );
+    an_OS.Set_Initial_Burst_Tau(input);
 }

@@ -39,6 +39,8 @@ void OS::Run() {
     }
 }
 
+/////////////////// Input Functions ///////////////////
+
 bool OS::Is_Valid_Signal_Input(const string &an_input) {
     size_t input_length = an_input.length();
     bool is_valid = false;
@@ -74,6 +76,20 @@ bool OS::Is_Valid_Signal_Input(const string &an_input) {
     return is_valid;
 }
 
+bool OS::Is_Valid_Numeric_Input(const string& user_input) {
+    if (user_input == "") {
+        return false;
+    }
+
+    for (size_t i = 0; i < user_input.length(); i++) {
+        if (!isdigit(user_input[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void OS::Process_Input(const string &an_input) {
     switch (an_input.length()) {
         case 1:
@@ -96,7 +112,18 @@ void OS::Process_Input(const string &an_input) {
     }
 }
 
+////////////////// Interrupt Handler //////////////////
+
 void OS::Handle_Interrupt(const string &an_input) {
+    // Pre-Emptive
+    if (!cpu_->Is_Idle()) {
+        double elapsed_time = Query_Timer();
+        cpu_->Unbind_Process();
+        PCB *interrupted_process = ready_queue_->dequeue();
+        interrupted_process->Update_Process_Stats(elapsed_time);
+        ready_queue_->enqueue(interrupted_process);
+    }
+
     string temp = "";
     temp = tolower(an_input[0]);
     temp += an_input[1];
@@ -137,14 +164,12 @@ void OS::Handle_Interrupt(const string &an_input) {
     }
 
     cout << endl;
+    cpu_->Bind_Process(ready_queue_->front());
 }
 
 void OS::Create_Process() {
-    PCB *new_process = new PCB(PID_counter_++);
+    PCB *new_process = new PCB(PID_counter_++, initial_burst_tau_);
     ready_queue_->enqueue(new_process);
-    if (cpu_->Is_Idle()) {
-        cpu_->Bind_Process(ready_queue_->front());
-    }
 }
 
 void OS::Snapshot() {
@@ -176,8 +201,14 @@ void OS::Snapshot() {
              << setw(10) << "MEMSTART"
              << setw(5) << "R/W"
              << left
-             << setw(20) << " FILE_LENGTH"
-             << setw(15) << " CPU_USAGE_TIME"
+             << setw(20) << " FILE_LENGTH";
+
+        if (an_input == "d") {
+            cout << setw(20) << " CYLINDER_ACCESED";
+        }
+
+        cout << setw(15) << " CPU_USAGE_TIME"
+             << left
              << setw(15) << " AVG_BURST_TIME"
              << endl;
 
@@ -205,10 +236,9 @@ void OS::Signal_Device_Completion(Device *a_device) {
     PCB *finished_process = a_device->Remove_Running_Process();
     finished_process->Clear_Params();
     ready_queue_->enqueue(finished_process);
-    if (cpu_->Is_Idle()) {
-        cpu_->Bind_Process(ready_queue_->front());
-    }
 }
+
+////////////////// System Calls //////////////////
 
 void OS::Handle_Sys_Call(const string &an_input) {
     if (cpu_->Is_Idle()) {
@@ -216,80 +246,59 @@ void OS::Handle_Sys_Call(const string &an_input) {
         return;
     }
 
+    // Burst finished, update all stats.
+    double elapsed_time = Query_Timer();
+    cpu_->Unbind_Process();
+    PCB *calling_process = ready_queue_->dequeue();
+    calling_process->Update_Process_Stats(elapsed_time, history_alpha_);
+
     switch (an_input[0]) {
         case 't':
-            Terminate_Running_Process();
+            Terminate_Running_Process(calling_process);
             cout << "Process terminated.\n";
             break;
         case 'p':
-            Request_Printer(printer_table_.find(an_input)->second);
+            Request_Printer(calling_process, printer_table_.find(an_input)->second);
             cout << "Request handled successfully.\n";
             break;
         case 'd':
-            Request_Disk(disk_table_.find(an_input)->second);
+            Request_Disk(calling_process, disk_table_.find(an_input)->second);
             cout << "Request handled successfully.\n";
             break;
         case 'c':
-            Request_Optical_Drive(cd_table_.find(an_input)->second);
+            Request_Optical_Drive(calling_process, cd_table_.find(an_input)->second);
             cout << "Request handled successfully.\n";
             break;
     }
 
     cout << endl;
-}
-
-void OS::Terminate_Running_Process() {
-    cpu_->Unbind_Process();
-    PCB *terminated_process = ready_queue_->dequeue();
-    delete terminated_process;
     if (!ready_queue_->empty()) {
         cpu_->Bind_Process(ready_queue_->front());
     }
 }
 
-void OS::Request_Printer(Device *a_printer) {
-    // Unbind process from CPU and remove from ready_queue_.
-    cpu_->Unbind_Process();
-    PCB *calling_process = ready_queue_->dequeue();
+void OS::Terminate_Running_Process(PCB *process) {
+    total_cpu_usage_time_ += process->Get_CPU_Usage_Time();
+    ++number_of_completed_processes_;
+    delete process;
+}
 
+void OS::Request_Printer(PCB *process, Printer *a_printer) {
     // Get parameters and add to device queue.
-    Acquire_Printer_Parameters(calling_process);
-    a_printer->Add_Process(calling_process);
-
-    // Bind next process to CPU if available.
-    if (!ready_queue_->empty()) {
-        cpu_->Bind_Process(ready_queue_->front());
-    }
+    Acquire_Printer_Parameters(process);
+    a_printer->Add_Process(process);
 }
 
-void OS::Request_Disk(Device *a_disk) {
-    // Unbind process from CPU and remove from ready_queue_.
-    cpu_->Unbind_Process();
-    PCB *calling_process = ready_queue_->dequeue();
-
+void OS::Request_Disk(PCB *process, Disk *a_disk) {
     // Get parameters and add to device queue.
-    Acquire_Disk_Parameters(calling_process);
-    a_disk->Add_Process(calling_process);
-
-    // Bind next process to CPU if available.
-    if (!ready_queue_->empty()) {
-        cpu_->Bind_Process(ready_queue_->front());
-    }
+    Acquire_Disk_Parameters(process, a_disk);
+    a_disk->Add_Process(process);
 }
 
-void OS::Request_Optical_Drive(Device *an_optical_drive) {
-    // Unbind process from CPU and remove from ready_queue_.
-    cpu_->Unbind_Process();
-    PCB *calling_process = ready_queue_->dequeue();
-
+void OS::Request_Optical_Drive(PCB *process, CD *an_optical_drive) {
     // Get parameters and add to device queue.
-    Acquire_Optical_Drive_Parameters(calling_process);
-    an_optical_drive->Add_Process(calling_process);
-
-    // Bind next process to CPU if available.
-    if (!ready_queue_->empty()) {
-        cpu_->Bind_Process(ready_queue_->front());
-    }
+    Acquire_Optical_Drive_Parameters(process);
+    an_optical_drive->Add_Process(process);
 }
 
 void OS::Acquire_Printer_Parameters(PCB *a_process) {
@@ -321,7 +330,7 @@ void OS::Acquire_Printer_Parameters(PCB *a_process) {
     a_process->Add_Param(param);
 }
 
-void OS::Acquire_Disk_Parameters(PCB *a_process) {
+void OS::Acquire_Disk_Parameters(PCB *a_process, Disk *target_disk) {
     string param = "";
 
     // Filename
@@ -357,6 +366,24 @@ void OS::Acquire_Disk_Parameters(PCB *a_process) {
         param = "";
         a_process->Add_Param(param);
     }
+
+    // Cylinder
+    cout << "Which cylinder will be accessed?\n> ";
+    getline(cin, param);
+    bool validated;
+    do {
+        validated = true;
+
+        if ( (param == "") || (!Is_Valid_Numeric_Input(param)) ) { // Valid numeric input.
+            validated = false;
+            cout << "Invalid input. Which cylinder will be accessed?\n> ";
+        } else if ( (unsigned int) stoi(param) > target_disk->Get_Cylinder_Count() ) { // Does not exceed cylinder count.
+            validated = false;
+            cout << "Invalid cylinder. Which cylinder will be accessed?\n> ";
+        }
+        getline(cin, param);
+    } while (!validated);
+    a_process->Add_Param(param);
 }
 
 void OS::Acquire_Optical_Drive_Parameters(PCB *a_process) {
@@ -397,58 +424,18 @@ void OS::Acquire_Optical_Drive_Parameters(PCB *a_process) {
     }
 }
 
+double OS::Query_Timer() {
+    double elapsed_time = 0;
 
-bool OS::Is_Valid_Numeric_Input(const string& user_input) {
-    if (user_input == "") {
-        return false;
+    cout << "How much time has pass (milliseconds)?\n> ";
+    cin >> elapsed_time;
+
+    while (!cin.good()) {
+        cout << "Invalid input. How much time has passed?\n";
+        cin.clear();
+        cin.ignore(100000, '\n');;
+        cin >> elapsed_time;
     }
 
-    for (size_t i = 0; i < user_input.length(); i++) {
-        if (!isdigit(user_input[i])) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-void OS::test() {
-    Device d1{"printer 1"};
-    // CPU d1;
-    PCB *p0 = new PCB{0};
-    p0->Add_Param("input.txt");
-    p0->Add_Param("132");
-    p0->Add_Param("W");
-    p0->Add_Param("31");
-
-    cout << d1 << endl;
-    d1.Add_Process(p0);
-    cout << d1 << endl;
-
-    PCB *p1 = new PCB{1};
-    p1->Add_Param("output.txt");
-    p1->Add_Param("345");
-    p1->Add_Param("W");
-    p1->Add_Param("41");
-    PCB *p2 = new PCB{2};
-    p2->Add_Param("data.txt");
-    p2->Add_Param("567");
-    p2->Add_Param("R");
-    p2->Add_Param("902");
-    PCB *p3 = new PCB{3};
-    p3->Add_Param("password.txt");
-    p3->Add_Param("21");
-    p3->Add_Param("W");
-    p3->Add_Param("345");
-    PCB *p4 = new PCB{4};
-    p4->Add_Param("hash.txt");
-    p4->Add_Param("987");
-    p4->Add_Param("R");
-    p4->Add_Param("75");
-
-    d1.Add_Process(p2);
-    d1.Add_Process(p1);
-    d1.Add_Process(p4);
-    d1.Add_Process(p3);
-    cout << d1;
+    return elapsed_time;
 }
