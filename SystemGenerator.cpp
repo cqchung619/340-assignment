@@ -25,7 +25,6 @@ OS SystemGenerator::Generate_OS() {
     Set_Initial_CPU_Scheduling_Values(an_OS);
 
     cout << "System installed.\n" << endl;
-    cin.clear();
     return an_OS;
 }
 
