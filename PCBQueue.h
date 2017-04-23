@@ -17,7 +17,7 @@ using namespace std;
 class PCBQueue {
 public:
     // Destructor
-    ~PCBQueue() {
+    virtual ~PCBQueue() {
         for (auto process : process_list_) {
             delete process;
         }
@@ -30,11 +30,11 @@ public:
     size_t size() const { return process_list_.size(); }
 
     // Adds process to the back of the queue.
-    void enqueue(PCB *a_process) { process_list_.push_back(a_process); }
+    virtual void enqueue(PCB *a_process) { process_list_.push_back(a_process); }
 
     // Removes the process in front of the queue and returns a copy.
     // Assumes queue is non-empty.
-    PCB *dequeue();
+    virtual PCB *dequeue();
 
     // Returns a reference to the process in the front of the queue.
     // Assumes queue is non-empty.
@@ -47,7 +47,7 @@ public:
     // Outputs the process_list_ to out in the specified format.
     void Output_Processes(ostream &out, PCB::OutputFormat format) const;
 
-private:
+protected:
     list<PCB*> process_list_;
 };
 
