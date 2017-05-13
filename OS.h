@@ -55,8 +55,13 @@ private:
     unsigned int PID_counter_;
     double history_alpha_; // Between 0 and 1.
     double initial_burst_tau_; // milliseconds.
+
+    // OS Statistics.
     double total_cpu_usage_time_;
     double number_of_completed_processes_;
+
+    // Memory Information.
+
 
     // CPU
     CPU *cpu_;
@@ -117,8 +122,6 @@ private:
     void Acquire_Optical_Drive_Parameters(PCB *a_process);
 
     double Query_Timer();
-
-    void test();
 };
 
 #endif

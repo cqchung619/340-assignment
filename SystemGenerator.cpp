@@ -1,6 +1,6 @@
 #include "SystemGenerator.h"
 
-bool SystemGenerator::Is_Valid_Numeric_Input(const string& user_input) {
+bool SystemGenerator::Is_Valid_Numeric_Input(const string &user_input) {
     if (user_input == "") {
         return false;
     }
@@ -23,6 +23,7 @@ OS SystemGenerator::Generate_OS() {
     Generate_CDs(an_OS);
 
     Set_Initial_CPU_Scheduling_Values(an_OS);
+    Set_Memory(an_OS);
 
     cout << "System installed.\n" << endl;
     return an_OS;
@@ -120,4 +121,34 @@ void SystemGenerator::Set_Initial_CPU_Scheduling_Values(OS &an_OS) {
     cout << endl;
 
     an_OS.Set_Initial_Burst_Tau(tau);
+}
+
+void SystemGenerator::Set_Memory(OS &an_OS) {
+    string input = "";
+
+    cout << "What is the size of memory?\n> ";
+    getline(cin, input);
+    while ( (!Is_Valid_Numeric_Input(input)) || (!Is_Power_Of_Two(input)) ) {
+        cout << "Invalid input. Please enter a valid number that is a power of 2:\n> ";
+        getline(cin, input);
+    }
+    int max_mem_size = stoi(input);
+    // Add to OS.
+
+    cout << "What is the max process size?\n> ";
+    getline(cin, input);
+    while ( (!Is_Valid_Numeric_Input(input) ) {
+        cout << "Invalid input. Please enter a valid number up to " << max_mem_size << ":\n> ";
+        getline(cin, input);
+    }
+}
+
+bool SystemGenerator::Is_Power_Of_Two(const string &user_input) {
+    int mem_size = stoi(user_input);
+    if (mem_size == 0) {
+        return false;
+    }
+
+    return ( (mem_size & (mem_size - 1)) == 0 );
+
 }
