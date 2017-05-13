@@ -24,7 +24,9 @@ using namespace std;
 
 class OS {
 public:
-    OS(): running_{true}, PID_counter_{0}, cpu_{new CPU}, ready_queue_{new ReadyQueue} {}
+    OS(): running_{true}, PID_counter_{0},
+          total_cpu_usage_time_{0}, number_of_completed_processes_{0},
+          cpu_{new CPU}, ready_queue_{new ReadyQueue} {}
     ~OS() {
         delete cpu_;
         delete ready_queue_;
