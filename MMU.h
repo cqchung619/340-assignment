@@ -17,34 +17,33 @@ using namespace std;
 
 class MMU {
 public:
-    MMU(const unsigned int mem, const unsigned int proc_mem, const unsigned int page_size):
-        MEM_MAX_{mem},
-        PROC_MEM_MAX_{proc_mem},
-        PAGE_SIZE_MAX_{page_size} {
-
-        unsigned int number_of_frames = MEM_MAX_ / PAGE_SIZE_MAX_;
-        for (unsigned int i = 0; i < number_of_frames; ++i) {
-            free_frame_list_.insert(i);
-        }
-    }
+    MMU() {}
     ~MMU() {}
 
-    // Accessors.
-    const unsigned int Get_MEM_MAX() { return MEM_MAX_; }
-    const unsigned int Get_PROC_MEM_MAX() { return PROC_MEM_MAX_; }
-    const unsigned int Get_PAGE_SIZE_MAX() { return PAGE_SIZE_MAX_; }
+    unsigned int Available_Mem_Size() { return free_frame_list_.size(); }
 
+    // Accessors and Modifiers.
+    void Set_Mem_Max(const unsigned int mem) { mem_max_ = mem; }
+    void Set_Proc_Mem_Max(const unsigned int proc_mem) { proc_mem_max_ = proc_mem; }
+    void Set_Page_Size_Max(const unsigned int page_size) { page_size_max_ = page_size; }
 
-    void Allocate_Mem(PCB *a_process);
+    unsigned int Get_Mem_Max() const { return mem_max_; }
+    unsigned int Get_Proc_Mem_Max() const { return proc_mem_max_; }
+    unsigned int Get_Page_Size_Max() const { return page_size_max_; }
+
+    // Memory management.
+    void Initialize_Mem();
+    bool Allocate_Mem(PCB *a_process);
     void Deallocate_Mem(PCB *a_process);
 
+    void Output_System_Memory_Info(ostream &out);
 private:
-    const unsigned int MEM_MAX_;
-    const unsigned int PROC_MEM_MAX_;
-    const unsigned int PAGE_SIZE_MAX_;
+    unsigned int mem_max_;
+    unsigned int proc_mem_max_;
+    unsigned int page_size_max_;
 
     set<unsigned int> free_frame_list_;
-    map<unsigned int, unsigned int> frame_table_;
+    map<unsigned int, std::pair<unsigned int, unsigned int>> frame_table_;
 };
 
 #endif
