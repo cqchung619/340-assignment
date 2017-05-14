@@ -14,6 +14,15 @@ bool SystemGenerator::Is_Valid_Numeric_Input(const string &user_input) {
     return true;
 }
 
+bool SystemGenerator::Is_Power_Of_Two(const string &user_input) {
+    int mem_size = stoi(user_input);
+    if (mem_size == 0) {
+        return false;
+    }
+
+    return ( (mem_size & (mem_size - 1)) == 0 );
+}
+
 OS SystemGenerator::Generate_OS() {
     OS an_OS{};
     cout << "System Installation: " << endl;
@@ -35,7 +44,7 @@ void SystemGenerator::Generate_Printers(OS &an_OS) {
     cout << "How many printers will be installed?\n> ";
     getline(cin, number_of_devices);
     while (!Is_Valid_Numeric_Input(number_of_devices)) {
-        cout << "Invalid input. Please enter a valid number:\n> ";
+        cout << "INVALID: Please enter a valid number:\n> ";
         getline(cin, number_of_devices);
     }
     cout << endl;
@@ -50,7 +59,7 @@ void SystemGenerator::Generate_Disks(OS &an_OS) {
     cout << "How many disks will be installed?\n> ";
     getline(cin, number_of_devices);
     while (!Is_Valid_Numeric_Input(number_of_devices)) {
-        cout << "Invalid input. Please enter a valid number:\n> ";
+        cout << "INVALID: Please enter a valid number:\n> ";
         getline(cin, number_of_devices);
     }
 
@@ -62,7 +71,7 @@ void SystemGenerator::Generate_Disks(OS &an_OS) {
         cout << "How many cylinders does disk "<< i << " have?\n> ";
         getline(cin, number_of_cylinders);
         while (!Is_Valid_Numeric_Input(number_of_cylinders)) {
-            cout << "Invalid input. Please enter a valid number:\n> ";
+            cout << "INVALID: Please enter a valid number:\n> ";
             getline(cin, number_of_cylinders);
         }
 
@@ -79,7 +88,7 @@ void SystemGenerator::Generate_CDs(OS &an_OS) {
     cout << "How many CD/RWs will be installed?\n> ";
     getline(cin, number_of_devices);
     while (!Is_Valid_Numeric_Input(number_of_devices)) {
-        cout << "Invalid input. Please enter a valid number:\n> ";
+        cout << "INVALID: Please enter a valid number:\n> ";
         getline(cin, number_of_devices);
     }
     cout << endl;
@@ -101,7 +110,7 @@ void SystemGenerator::Set_Initial_CPU_Scheduling_Values(OS &an_OS) {
         }
         alpha = 0;
 
-        cout << "Invalid input. Alpha should be a number within 0 and 1:\n> ";
+        cout << "INVALID: Alpha should be a number within 0 and 1:\n> ";
     }
     an_OS.Set_History_Alpha(alpha);
 
@@ -116,7 +125,7 @@ void SystemGenerator::Set_Initial_CPU_Scheduling_Values(OS &an_OS) {
         }
         tau = 0;
 
-        cout << "Invalid input. Tau should be a positive number:\n> ";
+        cout << "INVALID: Tau should be a positive number:\n> ";
     }
     cout << endl;
 
@@ -129,7 +138,7 @@ void SystemGenerator::Set_Memory(OS &an_OS) {
     cout << "What is the size of memory?\n> ";
     getline(cin, input);
     while ( (!Is_Valid_Numeric_Input(input)) || (!Is_Power_Of_Two(input)) ) {
-        cout << "Invalid input. Please enter a valid number that is a power of 2:\n> ";
+        cout << "INVALID: Max memory size is a power of 2:\n> ";
         getline(cin, input);
     }
     int max_mem_size = stoi(input);
@@ -137,18 +146,19 @@ void SystemGenerator::Set_Memory(OS &an_OS) {
 
     cout << "What is the max process size?\n> ";
     getline(cin, input);
-    while ( (!Is_Valid_Numeric_Input(input) ) {
-        cout << "Invalid input. Please enter a valid number up to " << max_mem_size << ":\n> ";
+    while ( (!Is_Valid_Numeric_Input(input)) || (!(stoi(input) <= max_mem_size)) ) {
+        cout << "INVALID: Max process size has to be within max memory size " << max_mem_size << ":\n> ";
         getline(cin, input);
     }
-}
+    int max_process_size = stoi(input);
+    // Add to OS.
 
-bool SystemGenerator::Is_Power_Of_Two(const string &user_input) {
-    int mem_size = stoi(user_input);
-    if (mem_size == 0) {
-        return false;
+    cout << "What is the page size?\n> ";
+    getline(cin, input);
+    while ( (!Is_Valid_Numeric_Input(input)) || (!(stoi(input) <= max_mem_size)) || (!Is_Power_Of_Two(input)) ) {
+        cout << "INVALID: Page size has to be within max memory size " << max_mem_size << " and is a power of 2:\n> ";
+        getline(cin, input);
     }
-
-    return ( (mem_size & (mem_size - 1)) == 0 );
-
+    //int page_size = stoi(input);
+    // Add to OS.
 }
