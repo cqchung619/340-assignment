@@ -1,5 +1,12 @@
 #include "OS.h"
 
+void OS::Initialize_Memory(const unsigned int mem, const unsigned int proc_size, const unsigned int page_size) {
+    mmu_->Set_Mem_Max(mem);
+    mmu_->Set_Proc_Mem_Max(proc_size);
+    mmu_->Set_Page_Size_Max(page_size);
+    mmu_->Initialize_Mem();
+}
+
 void OS::Initialize_Printers(const unsigned int number_of_printers) {
     for (unsigned int i = 0; i < number_of_printers; ++i) {
         string name = "p" + to_string(i);
@@ -132,7 +139,6 @@ void OS::Handle_Interrupt(const string &an_input) {
     switch (an_input[0]) {
         case 'A':
             Create_Process();
-            cout << "Process created.\n";
             break;
         case 'S':
             Snapshot();
@@ -170,8 +176,35 @@ void OS::Handle_Interrupt(const string &an_input) {
 }
 
 void OS::Create_Process() {
-    PCB *new_process = new PCB(PID_counter_++, 512, initial_burst_tau_);
-    ready_queue_->enqueue(new_process);
+    string input = "";
+
+    cout << "How big is the process?\n> ";
+    getline(cin, input);
+    while ( !Is_Valid_Numeric_Input(input) ) {
+        cout << "INVALID: Please enter a valid number:\n> ";
+        getline(cin, input);
+    }
+    if ( (unsigned int) stoi(input) > mmu_->Get_Proc_Mem_Max() ) {
+        cout << "REJECTED: Process is too big.\n";
+        return;
+    }
+    unsigned int process_size = (unsigned int) stoi(input);
+    unsigned int pages = 0;
+    if ( (process_size % mmu_->Get_Page_Size_Max()) == 0 ) {
+        pages = process_size / mmu_->Get_Page_Size_Max();
+    } else {
+        pages = (process_size / mmu_->Get_Page_Size_Max()) + 1;
+    }
+
+    PCB *new_process = new PCB(PID_counter_++, pages, initial_burst_tau_);
+    bool mem_alloc_successful = mmu_->Allocate_Mem(new_process);
+    if (!mem_alloc_successful) {
+        // put in job pool.
+    } else {
+        ready_queue_->enqueue(new_process);
+    }
+
+    cout << "Process created.\n";
 }
 
 void OS::Snapshot() {
@@ -199,7 +232,7 @@ void OS::Snapshot() {
              << endl;
         ready_queue_->Output_Processes(cout, PCB::CPU);
     } else if (an_input == "m") {
-        cout << "System memory" << endl;
+        mmu_->Output_System_Memory_Info(cout);
     } else if (an_input == "j") {
         cout << "Job pool" << endl;
     } else {

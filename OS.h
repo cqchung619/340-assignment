@@ -12,6 +12,7 @@ Assignment #3: Paging, Memory Management
 #include "CPU.h"
 #include "Device.h"
 #include "Disk.h"
+#include "MMU.h"
 #include "PCB.h"
 #include "PCBQueue.h"
 #include "Printer.h"
@@ -26,8 +27,9 @@ class OS {
 public:
     OS(): running_{true}, PID_counter_{0},
           total_cpu_usage_time_{0}, number_of_completed_processes_{0},
-          cpu_{new CPU}, ready_queue_{new ReadyQueue} {}
+          mmu_{new MMU}, cpu_{new CPU}, ready_queue_{new ReadyQueue} {}
     ~OS() {
+        delete mmu_;
         delete cpu_;
         delete ready_queue_;
         for (auto printer : printer_table_) {
@@ -43,6 +45,8 @@ public:
 
     void Set_History_Alpha(const double alpha) { history_alpha_ = alpha; }
     void Set_Initial_Burst_Tau(const double tau) { initial_burst_tau_ = tau; }
+
+    void Initialize_Memory(const unsigned int mem, const unsigned int proc_size, const unsigned int page_size);
 
     void Initialize_Printers(const unsigned int number_of_printers);
     void Initialize_Disks(const vector<unsigned int> &number_of_disks);
@@ -62,7 +66,8 @@ private:
     double total_cpu_usage_time_;
     double number_of_completed_processes_;
 
-    // Memory Information.
+    // Memory Management Unit.
+    MMU *mmu_;
 
     // Processes not in memory.
 
