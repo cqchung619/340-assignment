@@ -1,3 +1,10 @@
+/*
+Author: Cuong Chung
+Course: CSCI 34000
+Instructor: Eric Schweitzer
+Assignment #3: Paging, Memory Management
+*/
+
 #ifndef READY_QUEUE_H
 #define READY_QUEUE_H
 

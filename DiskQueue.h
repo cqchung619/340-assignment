@@ -2,7 +2,7 @@
 Author: Cuong Chung
 Course: CSCI 34000
 Instructor: Eric Schweitzer
-Assignment #2: Pre-Emptive SJF, Disk Scheduling and Accounting
+Assignment #3: Paging, Memory Management
 
 The DiskQueue is a circular linked list that simulates the CLOOK disk scheduling algorithm. Each process is scheduled in
 ascending order based on the cylinder accessed. The seek head is always traveling inwards (i.e. higher cylinder number).
