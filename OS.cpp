@@ -199,7 +199,7 @@ void OS::Create_Process() {
     PCB *new_process = new PCB(PID_counter_++, pages, initial_burst_tau_);
     bool mem_alloc_successful = mmu_->Allocate_Mem(new_process);
     if (!mem_alloc_successful) {
-        // put in job pool.
+        job_pool_->Add_Process(new_process);
     } else {
         ready_queue_->enqueue(new_process);
     }

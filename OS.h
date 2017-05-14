@@ -12,6 +12,7 @@ Assignment #3: Paging, Memory Management
 #include "CPU.h"
 #include "Device.h"
 #include "Disk.h"
+#include "JobPool.h"
 #include "MMU.h"
 #include "PCB.h"
 #include "PCBQueue.h"
@@ -27,7 +28,7 @@ class OS {
 public:
     OS(): running_{true}, PID_counter_{0},
           total_cpu_usage_time_{0}, number_of_completed_processes_{0},
-          mmu_{new MMU}, cpu_{new CPU}, ready_queue_{new ReadyQueue} {}
+          mmu_{new MMU}, job_pool_{new JobPool}, cpu_{new CPU}, ready_queue_{new ReadyQueue} {}
     ~OS() {
         delete mmu_;
         delete cpu_;
@@ -70,7 +71,7 @@ private:
     MMU *mmu_;
 
     // Processes not in memory.
-
+    JobPool *job_pool_;
 
     // CPU
     CPU *cpu_;
