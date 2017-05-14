@@ -142,7 +142,6 @@ void SystemGenerator::Set_Memory(OS &an_OS) {
         getline(cin, input);
     }
     int max_mem_size = stoi(input);
-    // Add to OS.
 
     cout << "What is the max process size?\n> ";
     getline(cin, input);
@@ -151,7 +150,6 @@ void SystemGenerator::Set_Memory(OS &an_OS) {
         getline(cin, input);
     }
     int max_process_size = stoi(input);
-    // Add to OS.
 
     cout << "What is the page size?\n> ";
     getline(cin, input);
@@ -159,6 +157,7 @@ void SystemGenerator::Set_Memory(OS &an_OS) {
         cout << "INVALID: Page size has to be within max memory size " << max_mem_size << " and is a power of 2:\n> ";
         getline(cin, input);
     }
-    //int page_size = stoi(input);
-    // Add to OS.
+    int page_size = stoi(input);
+
+    an_OS.Initialize_Memory(max_mem_size, max_process_size, page_size);
 }

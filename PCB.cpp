@@ -26,17 +26,12 @@ double PCB::Get_Average_Burst_Time() {
 }
 
 void PCB::Update_Page_Table(const vector<unsigned int> &allocated_frame_list) {
-    for (size_t i = 0; i < page_table_.size(); ++i) {
+    for (size_t i = 0; i < number_of_pages_; ++i) {
         page_table_[i] = allocated_frame_list[i];
     }
 }
 
 string PCB::Get_Frame_List() {
-    // page_table_.insert(std::pair<unsigned int, unsigned int>(0, 5));
-    // page_table_.insert(std::pair<unsigned int, unsigned int>(1, 9));
-    // page_table_.insert(std::pair<unsigned int, unsigned int>(2, 1));
-    // page_table_.insert(std::pair<unsigned int, unsigned int>(3, 0));
-
     string frame_list = "";
     for (size_t i = 0; i < page_table_.size(); ++i) {
         if ( (i + 1) == page_table_.size() ) {

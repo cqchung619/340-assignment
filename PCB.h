@@ -21,7 +21,7 @@ public:
 
     // @a_PID: OS assigned integer value.
     // All newly constructed PCBs are in the NEW state.
-    PCB(const unsigned int a_PID, unsigned int a_size, double initial_burst): PID_{a_PID}, size_{a_size} {
+    PCB(const unsigned int a_PID, const unsigned int pages, double initial_burst): PID_{a_PID}, number_of_pages_{pages} {
         stats_.cpu_usage_time = 0;
         stats_.actual_burst_time = 0;
         stats_.estimated_burst_time = initial_burst;
@@ -32,11 +32,10 @@ public:
 
     // @rhs: PCB to be copied.
     // Constructs a copy of rhs.
-    PCB(const PCB &rhs): PID_{rhs.PID_}, size_{rhs.size_}, parameters_{rhs.parameters_} {}
+    PCB(const PCB &rhs): PID_{rhs.PID_}, number_of_pages_{rhs.number_of_pages_}, parameters_{rhs.parameters_} {}
 
-    // PID/size accessor. PID/size never changes.
+    // PID accessor. PID never changes.
     const unsigned int &Get_PID() const { return PID_; }
-    const unsigned int &Get_Size() const { return SIZE_; }
 
     //////////////////// Parameter accessor and modifier. ////////////////////
 
@@ -59,7 +58,7 @@ public:
     //////////////////// Page Table functions. ////////////////////
 
     // Return number of pages.
-    size_t Get_Page_Table_Size() { return page_table_.size(); }
+    size_t Get_Page_Table_Size() { return number_of_pages_; }
     // Return frame number associated with page_number.
     unsigned int Get_Frame_At(const unsigned int page_number) { return page_table_[page_number]; }
     // Return a string of all frames being used in order by page number.
@@ -85,7 +84,7 @@ private:
     } stats_;
 
     const unsigned int PID_;
-    const unsigned int SIZE_;
+    unsigned int number_of_pages_;
 
     map<unsigned int, unsigned int> page_table_;
 
