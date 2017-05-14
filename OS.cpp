@@ -170,7 +170,7 @@ void OS::Handle_Interrupt(const string &an_input) {
 }
 
 void OS::Create_Process() {
-    PCB *new_process = new PCB(PID_counter_++, initial_burst_tau_);
+    PCB *new_process = new PCB(PID_counter_++, 512, initial_burst_tau_);
     ready_queue_->enqueue(new_process);
 }
 
@@ -178,11 +178,12 @@ void OS::Snapshot() {
     string an_input = "";
     bool valid_input = false;
     do {
-        cout << "Select an option (r/p/d/c):\n> ";
+        cout << "Select an option (r/p/d/c/m/j):\n> ";
         getline(cin, an_input);
 
         valid_input = an_input == "r" || an_input == "p" ||
-                      an_input == "d" || an_input == "c";
+                      an_input == "d" || an_input == "c" ||
+                      an_input == "m" || an_input == "j";
     } while (!valid_input);
 
     cout << "SYSTEMS AVERAGE CPU TIME: "
@@ -190,20 +191,24 @@ void OS::Snapshot() {
          << endl;
 
     if (an_input == "r") {
-        cout << "---Ready Queue---" << endl;
+        cout << "-----Ready Queue-----" << endl;
         cout << right
              << setw(5) << "PID"
              << setw(20) << "TOTAL_CPU_TIME"
              << setw(20) << "AVG_BURST_TIME"
              << endl;
         ready_queue_->Output_Processes(cout, PCB::CPU);
+    } else if (an_input == "m") {
+        cout << "System memory" << endl;
+    } else if (an_input == "j") {
+        cout << "Job pool" << endl;
     } else {
         cout << right
              << setw(3) << "PID"
              << left
-             << setw(9) << " FILENAME"
+             << setw(14) << " FILENAME"
              << right
-             << setw(10) << "MEMSTART"
+             << setw(5) << "ADDR"
              << setw(5) << "R/W"
              << left
              << setw(13) << "  FILE_LENGTH";

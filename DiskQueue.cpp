@@ -115,6 +115,9 @@ void DiskQueue::Output_Processes(ostream &out, PCB::OutputFormat format) const {
     Node *temp = seek_head_;
     do {
         temp->process->Output_PCB(out, format);
+        out << "|___Page Table: "
+            << temp->process->Get_Frame_List()
+            << endl;
         temp = temp->next;
     } while (temp != seek_head_);
 }

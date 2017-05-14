@@ -25,21 +25,49 @@ double PCB::Get_Average_Burst_Time() {
     return stats_.total_burst_time / (double) stats_.burst_count;
 }
 
+void PCB::Update_Page_Table(const vector<unsigned int> &allocated_frame_list) {
+    for (size_t i = 0; i < page_table_.size(); ++i) {
+        page_table_[i] = allocated_frame_list[i];
+    }
+}
+
+string PCB::Get_Frame_List() {
+    // page_table_.insert(std::pair<unsigned int, unsigned int>(0, 5));
+    // page_table_.insert(std::pair<unsigned int, unsigned int>(1, 9));
+    // page_table_.insert(std::pair<unsigned int, unsigned int>(2, 1));
+    // page_table_.insert(std::pair<unsigned int, unsigned int>(3, 0));
+
+    string frame_list = "";
+    for (size_t i = 0; i < page_table_.size(); ++i) {
+        if ( (i + 1) == page_table_.size() ) {
+            frame_list += to_string(page_table_[i]);
+        } else {
+            frame_list += to_string(page_table_[i]) + ", ";
+        }
+    }
+
+    return frame_list;
+}
+
 void PCB::Output_PCB(ostream &out, OutputFormat format){
     switch (format) {
         case CPU:
-            out << right
-                << setw(5) << PID_
+            out << left
+                << "|"
+                << right
+                << setw(4) << PID_
                 << setw(20) << (double) Get_CPU_Usage_Time()
                 << setw(20) << (double) Get_Average_Burst_Time();
             break;
         case DEVICE:
-            out << right
-                << setw(3) << PID_
-                << left
-                << setw(9) << ( "  " + parameters_[0] )
+            out << left
+                << "|"
                 << right
-                << setw(10) << parameters_[1]
+                << setw(2) << PID_
+                << left
+                << setw(14) << ( "  " + parameters_[0] )
+                << right
+                << setw(5) << parameters_[1]
                 << setw(5) << parameters_[2]
                 << left
                 << setw(13) << ( "  " + parameters_[3] )
@@ -48,12 +76,14 @@ void PCB::Output_PCB(ostream &out, OutputFormat format){
                 << setw(16) << (double) Get_Average_Burst_Time();
             break;
         case DISK:
-            out << right
-                << setw(3) << PID_
-                << left
-                << setw(9) << ( "  " + parameters_[0] )
+            out << left
+                << "|"
                 << right
-                << setw(10) << parameters_[1]
+                << setw(2) << PID_
+                << left
+                << setw(14) << ( "  " + parameters_[0] )
+                << right
+                << setw(5) << parameters_[1]
                 << setw(5) << parameters_[2]
                 << left
                 << setw(13) << ( "  " + parameters_[3] )
