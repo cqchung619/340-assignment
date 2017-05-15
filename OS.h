@@ -92,7 +92,10 @@ private:
     bool Is_Valid_Signal_Input(const string &an_input);
 
     // Validates a non-empty, numeric input.
-    bool Is_Valid_Numeric_Input(const string& user_input);
+    bool Is_Valid_Numeric_Input(const string &user_input);
+
+    // Validates a non-empty, hexadecimal input.
+    bool Is_Valid_Hex_Input(const string &user_input);
 
     // Processes the input to determine if the Interrupr Handler or the System Call Handler should be used.
     // Interrupt: A, S (P/D/C)#
@@ -127,6 +130,9 @@ private:
     void Request_Printer(PCB *process, Printer *a_printer);
     void Request_Disk(PCB *process, Disk *a_disk);
     void Request_Optical_Drive(PCB *process, CD *an_optical_drive);
+
+    bool Is_Valid_Memory_Access(PCB *a_process, const unsigned int address);
+    void Convert_To_Pysical_Address(PCB *a_process, string &address);
 
     void Acquire_Printer_Parameters(PCB *a_process);
     void Acquire_Disk_Parameters(PCB *a_process, Disk *target_disk);

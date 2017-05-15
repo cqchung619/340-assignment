@@ -92,8 +92,22 @@ bool OS::Is_Valid_Numeric_Input(const string& user_input) {
         return false;
     }
 
-    for (size_t i = 0; i < user_input.length(); i++) {
+    for (size_t i = 0; i < user_input.length(); ++i) {
         if (!isdigit(user_input[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool OS::Is_Valid_Hex_Input(const string &user_input) {
+    if (user_input == "") {
+        return false;
+    }
+
+    for (size_t i = 0; i < user_input.length(); ++i) {
+        if (!isxdigit(user_input[i])) {
             return false;
         }
     }
@@ -401,6 +415,31 @@ void OS::Request_Optical_Drive(PCB *process, CD *an_optical_drive) {
     an_optical_drive->Add_Process(process);
 }
 
+bool OS::Is_Valid_Memory_Access(PCB *a_process, const unsigned int address) {
+    if (address > a_process->Get_SIZE()) { // address is outside process size range.
+        return false;
+    }
+
+    unsigned int page_size = mmu_->Get_Page_Size_Max();
+    unsigned int offset = address % page_size;
+    if (offset > page_size) { // Offset goes beyond limit of a single frame.
+        return false;
+    }
+
+    return true;
+}
+
+void OS::Convert_To_Pysical_Address(PCB *a_process, string &address) {
+    unsigned int logical_address = stoi(address, nullptr, 16);
+    unsigned int page_number = logical_address / mmu_->Get_Page_Size_Max();
+    unsigned int offset = logical_address % mmu_->Get_Page_Size_Max();
+    unsigned int physical_address = (a_process->Get_Frame_At(page_number) * mmu_->Get_Page_Size_Max()) + offset;
+
+    ostringstream hex_address;
+    hex_address << std::hex << std::uppercase << physical_address;
+    address = hex_address.str();
+}
+
 void OS::Acquire_Printer_Parameters(PCB *a_process) {
     string param = "";
 
@@ -412,10 +451,22 @@ void OS::Acquire_Printer_Parameters(PCB *a_process) {
     a_process->Add_Param(param);
 
     // Memstart
-    do {
-        cout << "Where is the memstart location (numerical)?\n> ";
+    cout << "Where is the memstart address (hexadecimal)?\n> ";
+    while (true) {
         getline(cin, param);
-    } while (param == "" || !Is_Valid_Numeric_Input(param));
+        if (!Is_Valid_Hex_Input(param)) {
+            cout << "ERROR: Enter a valid address:\n> ";
+        } else {
+            unsigned int address = stoi(param, nullptr, 16);
+            if ( !Is_Valid_Memory_Access(a_process, address) ) {
+                cout << "ERROR: Invalid memory access. Enter a valid access:\n> ";
+            } else {
+                Convert_To_Pysical_Address(a_process, param);
+                cout << "Physical address: " << param << endl;
+                break;
+            }
+        }
+    }
     a_process->Add_Param(param);
 
     // R/W
@@ -426,7 +477,7 @@ void OS::Acquire_Printer_Parameters(PCB *a_process) {
     do {
         cout << "What is the file length (numerical)?\n> ";
         getline(cin, param);
-    } while (param == "" || !Is_Valid_Numeric_Input(param));
+    } while (!Is_Valid_Numeric_Input(param));
     a_process->Add_Param(param);
 }
 
@@ -441,10 +492,22 @@ void OS::Acquire_Disk_Parameters(PCB *a_process, Disk *target_disk) {
     a_process->Add_Param(param);
 
     // Memstart
-    do {
-        cout << "Where is the memstart location (numerical)?\n> ";
+    cout << "Where is the memstart address (hexadecimal)?\n> ";
+    while (true) {
         getline(cin, param);
-    } while (param == "" || !Is_Valid_Numeric_Input(param));
+        if (!Is_Valid_Hex_Input(param)) {
+            cout << "ERROR: Enter a valid address:\n> ";
+        } else {
+            unsigned int address = stoi(param, nullptr, 16);
+            if ( !Is_Valid_Memory_Access(a_process, address) ) {
+                cout << "ERROR: Invalid memory access. Enter a valid access:\n> ";
+            } else {
+                Convert_To_Pysical_Address(a_process, param);
+                cout << "Physical address: " << param << endl;
+                break;
+            }
+        }
+    }
     a_process->Add_Param(param);
 
     // R/W
@@ -500,10 +563,22 @@ void OS::Acquire_Optical_Drive_Parameters(PCB *a_process) {
     a_process->Add_Param(param);
 
     // Memstart
-    do {
-        cout << "Where is the memstart location (numerical)?\n> ";
+    cout << "Where is the memstart address (hexadecimal)?\n> ";
+    while (true) {
         getline(cin, param);
-    } while (param == "" || !Is_Valid_Numeric_Input(param));
+        if (!Is_Valid_Hex_Input(param)) {
+            cout << "ERROR: Enter a valid address:\n> ";
+        } else {
+            unsigned int address = stoi(param, nullptr, 16);
+            if ( !Is_Valid_Memory_Access(a_process, address) ) {
+                cout << "ERROR: Invalid memory access. Enter a valid access:\n> ";
+            } else {
+                Convert_To_Pysical_Address(a_process, param);
+                cout << "Physical address: " << param << endl;
+                break;
+            }
+        }
+    }
     a_process->Add_Param(param);
 
     // R/W
