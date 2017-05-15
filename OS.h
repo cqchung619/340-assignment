@@ -108,6 +108,7 @@ private:
     void Create_Process();
     void Snapshot();
     void Signal_Device_Completion(Device *a_device);
+    void Kill_Process(const string &signal);
 
     ////////////////// System Calls //////////////////
 
@@ -130,6 +131,10 @@ private:
     void Acquire_Printer_Parameters(PCB *a_process);
     void Acquire_Disk_Parameters(PCB *a_process, Disk *target_disk);
     void Acquire_Optical_Drive_Parameters(PCB *a_process);
+
+    // Helper functions for Kill_Process() and Terminate_Running_Process().
+    void Display_Terminated_Process_Stats(PCB *terminated_process, bool completed);
+    void Schedule_Eligible_Process();
 
     double Query_Timer();
 };

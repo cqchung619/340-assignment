@@ -41,7 +41,7 @@ void OS::Run() {
         if (Is_Valid_Signal_Input(input)) {
             Process_Input(input);
         } else {
-            cout << "Invalid\n" << endl;;
+            cout << "INVALID\n" << endl;;
         }
     }
 }
@@ -56,24 +56,28 @@ bool OS::Is_Valid_Signal_Input(const string &an_input) {
         case 1: // A, S, t
             is_valid = an_input == "A" || an_input == "S" || an_input == "t";
             break;
-        case 2: { // (P/D/C)#, (p/d/c)#
+        case 2: { // (P/D/C)#, (p/d/c)#, K#
             if (isalpha(an_input[0]) && isdigit(an_input[1])) { // (letter)(number)
                 string temp = an_input;
 
-                // Check if the device exists.
+                // Check if the device exists or signal is K.
                 if (isupper(an_input[0])) { // If uppercase convert to lowercase
                     temp[0] = tolower(an_input[0]);
                 }
 
                 is_valid = printer_table_.count(temp) != 0 ||
                            disk_table_.count(temp) != 0 ||
-                           cd_table_.count(temp) != 0;
+                           cd_table_.count(temp) != 0 ||
+                           an_input[0] == 'K';
             }
 
             break;
         }
         default:
-            if (an_input == "EXIT" || an_input == "exit") {
+            if (an_input[0] == 'K') { // K#, where # > 9.
+                string temp = an_input.substr(1, an_input.length() -1);
+                is_valid = Is_Valid_Numeric_Input(temp);
+            } else if (an_input == "EXIT" || an_input == "exit") {
                 is_valid = true;
             }
 
@@ -167,6 +171,9 @@ void OS::Handle_Interrupt(const string &an_input) {
                 cout << "Current CD/RW process complete.\n";
             }
             break;
+        case 'K':
+            Kill_Process(an_input);
+            break;
     }
 
     cout << endl;
@@ -180,7 +187,7 @@ void OS::Create_Process() {
 
     cout << "How big is the process?\n> ";
     getline(cin, input);
-    while ( !Is_Valid_Numeric_Input(input) ) {
+    while ( (!Is_Valid_Numeric_Input(input)) || !(stoi(input) > 0) ) {
         cout << "INVALID: Please enter a valid number:\n> ";
         getline(cin, input);
     }
@@ -285,6 +292,23 @@ void OS::Signal_Device_Completion(Device *a_device) {
     ready_queue_->enqueue(finished_process);
 }
 
+void OS::Kill_Process(const string &input) {
+    string temp = input.substr(1, input.length() - 1);
+    unsigned int pid = (unsigned int) stoi(temp);
+    PCB *killed_process = ready_queue_->remove(pid);
+    if (killed_process == nullptr) {
+        cout << "ERROR: Process " << pid << " does not exist.\n";
+        return;
+    }
+
+    Display_Terminated_Process_Stats(killed_process, false);
+
+    mmu_->Deallocate_Mem(killed_process);
+    Schedule_Eligible_Process();
+
+    delete killed_process;
+}
+
 ////////////////// System Calls //////////////////
 
 void OS::Handle_Sys_Call(const string &an_input) {
@@ -325,17 +349,11 @@ void OS::Handle_Sys_Call(const string &an_input) {
 }
 
 void OS::Terminate_Running_Process(PCB *process) {
-    total_cpu_usage_time_ += process->Get_CPU_Usage_Time();
-    ++number_of_completed_processes_;
+    Display_Terminated_Process_Stats(process, true);
 
-    cout << "SYSTEM AVERAGE CPU TIME: "
-         << ( (number_of_completed_processes_ == 0) ? 0 : (total_cpu_usage_time_ / number_of_completed_processes_) )
-         << endl;
-
-    cout << "PID: " << process->Get_PID()
-         << "\tTotal CPU time: " << process->Get_CPU_Usage_Time()
-         << "\tAverage burst time: " << process->Get_Average_Burst_Time()
-         << endl;
+    // Memory Management.
+    mmu_->Deallocate_Mem(process);
+    Schedule_Eligible_Process();
 
     delete process;
 }
@@ -433,11 +451,11 @@ void OS::Acquire_Disk_Parameters(PCB *a_process, Disk *target_disk) {
 
         if ( (param == "") || (!Is_Valid_Numeric_Input(param)) ) { // Valid numeric input.
             validated = false;
-            cout << "Invalid input. Which cylinder will be accessed?\n> ";
+            cout << "INVALID: Which cylinder will be accessed?\n> ";
             getline(cin, param);
         } else if ( (unsigned int) stoi(param) > target_disk->Get_Cylinder_Count() - 1 ) {
             validated = false;
-            cout << "Invalid cylinder. Which cylinder will be accessed (0 - "
+            cout << "INVALID: Which cylinder will be accessed (0 - "
                  << target_disk->Get_Cylinder_Count() - 1
                  << ")?\n> ";
             getline(cin, param);
@@ -484,11 +502,38 @@ void OS::Acquire_Optical_Drive_Parameters(PCB *a_process) {
     }
 }
 
+void OS::Display_Terminated_Process_Stats(PCB *terminated_process, bool completed) {
+    if (completed) {
+        total_cpu_usage_time_ += terminated_process->Get_CPU_Usage_Time();
+        ++number_of_completed_processes_;
+    }
+
+    cout << "SYSTEM AVERAGE CPU TIME: "
+         << ( (number_of_completed_processes_ == 0) ? 0 : (total_cpu_usage_time_ / number_of_completed_processes_) )
+         << endl;
+
+    cout << "PID: " << terminated_process->Get_PID()
+         << "\tTotal CPU time: " << terminated_process->Get_CPU_Usage_Time()
+         << "\tAverage burst time: " << terminated_process->Get_Average_Burst_Time()
+         << endl;
+}
+
+void OS::Schedule_Eligible_Process() {
+    unsigned int number_of_free_frames = mmu_->Available_Mem_Size();
+    PCB *eligible_process = job_pool_->Find_Largest_Process(number_of_free_frames);
+    if (eligible_process != nullptr) {
+        PCB *copy = new PCB{*eligible_process};
+        mmu_->Allocate_Mem(copy);
+        ready_queue_->enqueue(copy);
+        job_pool_->Remove_Pocess(eligible_process);
+    }
+}
+
 double OS::Query_Timer() {
     string input = "";
 
     double elapsed_time = 0;
-    cout << "How much time has pass (milliseconds)?\n> ";
+    cout << "How much time has passed (milliseconds)?\n> ";
     while (true) {
         getline(cin, input);
 
@@ -498,7 +543,7 @@ double OS::Query_Timer() {
         }
         elapsed_time = 0;
 
-        cout << "Invalid input. How much time has passed?\n> ";
+        cout << "INVALID: How much time has passed?\n> ";
     }
 
     return elapsed_time;
