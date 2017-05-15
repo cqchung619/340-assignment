@@ -21,10 +21,11 @@ public:
 
     PCB *Find_Largest_Process(const unsigned int size_limit);
     void Add_Process(PCB *a_process);
-    void Remove_Pocess(PCB *a_process);
+    void Remove_Process(PCB *a_process);
 
     void Output_Job_Pool(ostream& out);
 private:
+    // <number of pages, list<PCB*>>
     map<unsigned int, list<PCB*>> pool_;
 
 

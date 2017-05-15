@@ -23,7 +23,7 @@ void JobPool::Add_Process(PCB *a_process) {
     pool_[page_table_size].push_back(a_process);
 }
 
-void JobPool::Remove_Pocess(PCB *a_process) {
+void JobPool::Remove_Process(PCB *a_process) {
     unsigned int page_table_size = a_process->Get_Page_Table_Size();
     if (pool_[page_table_size].size() == 1) {
         pool_.erase(page_table_size);
