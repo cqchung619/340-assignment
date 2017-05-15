@@ -30,7 +30,7 @@ void PCBQueue::Output_Processes(ostream &out, PCB::OutputFormat format) const {
     for (auto process : process_list_) {
         process->Output_PCB(out, format);
         out << "|___Page Table: "
-            << process->Get_Frame_List()
+            << process->Get_Frame_List_String()
             << endl;
     }
 }
