@@ -29,7 +29,13 @@ bool MMU::Allocate_Mem(PCB *a_process) {
 }
 
 void MMU::Deallocate_Mem(PCB *a_process) {
+    vector<unsigned int> frame_list = a_process->Get_Frame_List();
+    for (size_t i = 0; i < frame_list.size(); ++i) {
+        frame_table_.erase(frame_list.at(i));
+        free_frame_list_.insert(frame_list.at(i));
+    }
 
+    a_process->Clear_Page_Table();
 }
 
 void MMU::Output_System_Memory_Info(ostream &out) {

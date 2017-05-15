@@ -42,7 +42,9 @@ private:
     unsigned int proc_mem_max_;
     unsigned int page_size_max_;
 
+    // <frame#>
     set<unsigned int> free_frame_list_;
+    // <frame#, <pid, page#>>
     map<unsigned int, std::pair<unsigned int, unsigned int>> frame_table_;
 };
 
