@@ -64,5 +64,8 @@ void MMU::Output_System_Memory_Info(ostream &out) {
             out << "\n";
         }
     }
-    out << endl;
+
+    if (!free_frame_list_.empty()) {
+        out << endl;
+    }
 }
