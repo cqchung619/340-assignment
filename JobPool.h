@@ -2,16 +2,20 @@
 #define JOB_POOL_H
 
 #include "PCB.h"
-#include "PCBQueue.h"
 
+#include <iostream>
+#include <list>
 #include <map>
+using namespace std;
 
 class JobPool {
 public:
     JobPool() {}
     ~JobPool() {
         for (auto item : pool_) {
-            delete item.second;
+            for (auto process : item.second) {
+                delete process;
+            }
         }
     }
 
@@ -19,11 +23,11 @@ public:
     void Add_Process(PCB *a_process);
     void Remove_Pocess(PCB *a_process);
 
-    void Output_Job_Pool();
+    void Output_Job_Pool(ostream& out);
 private:
-    map<unsigned int, PCBQueue*> pool_;
+    map<unsigned int, list<PCB*>> pool_;
 
-    
+
 };
 
 #endif

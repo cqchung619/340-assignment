@@ -196,7 +196,7 @@ void OS::Create_Process() {
         pages = (process_size / mmu_->Get_Page_Size_Max()) + 1;
     }
 
-    PCB *new_process = new PCB(PID_counter_++, pages, initial_burst_tau_);
+    PCB *new_process = new PCB(PID_counter_++, pages, process_size, initial_burst_tau_);
     bool mem_alloc_successful = mmu_->Allocate_Mem(new_process);
     if (!mem_alloc_successful) {
         job_pool_->Add_Process(new_process);
@@ -234,7 +234,12 @@ void OS::Snapshot() {
     } else if (an_input == "m") {
         mmu_->Output_System_Memory_Info(cout);
     } else if (an_input == "j") {
-        cout << "Job pool" << endl;
+        cout << "-----Job Pool-----" << endl;
+        cout << right
+             << setw(5) << "PID"
+             << setw(5) << "SIZE"
+             << endl;
+        job_pool_->Output_Job_Pool(cout);
     } else {
         cout << right
              << setw(3) << "PID"
