@@ -295,9 +295,34 @@ void OS::Signal_Device_Completion(Device *a_device) {
 void OS::Kill_Process(const string &input) {
     string temp = input.substr(1, input.length() - 1);
     unsigned int pid = (unsigned int) stoi(temp);
-    PCB *killed_process = ready_queue_->remove(pid);
+
+    PCB *killed_process = ready_queue_->remove(pid); // Not in ready queue.
     if (killed_process == nullptr) {
-        cout << "ERROR: Process " << pid << " does not exist.\n";
+        for (auto item : printer_table_) { // Check printers.
+            killed_process = item.second->Remove_Process(pid);
+            if (killed_process != nullptr) { // Found.
+                break;
+            }
+        }
+    }
+    if (killed_process == nullptr) {
+        for (auto item : disk_table_) { // Check disks.
+            killed_process = item.second->Remove_Process(pid);
+            if (killed_process != nullptr) { // Found.
+                break;
+            }
+        }
+    }
+    if (killed_process == nullptr) {
+        for (auto item : cd_table_) { // Check cds.
+            killed_process = item.second->Remove_Process(pid);
+            if (killed_process != nullptr) { // Found.
+                break;
+            }
+        }
+    }
+    if (killed_process == nullptr) {
+        cout << "ERROR: Process " << pid << " does not exist in memory.\n";
         return;
     }
 
@@ -525,7 +550,7 @@ void OS::Schedule_Eligible_Process() {
         PCB *copy = new PCB{*eligible_process};
         mmu_->Allocate_Mem(copy);
         ready_queue_->enqueue(copy);
-        job_pool_->Remove_Pocess(eligible_process);
+        job_pool_->Remove_Process(eligible_process);
     }
 }
 
