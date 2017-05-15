@@ -137,15 +137,21 @@ void SystemGenerator::Set_Memory(OS &an_OS) {
 
     cout << "What is the size of memory?\n> ";
     getline(cin, input);
-    while ( (!Is_Valid_Numeric_Input(input)) || (!Is_Power_Of_Two(input)) ) {
-        cout << "INVALID: Max memory size is a power of 2:\n> ";
+    while ( (!Is_Valid_Numeric_Input(input)) ||
+            (stoi(input) == 0) ||
+            (stoi(input) % 2 != 0) ) {
+
+        cout << "INVALID: Max memory size should be greater than 0 and divisible by 2:\n> ";
         getline(cin, input);
     }
     int max_mem_size = stoi(input);
 
     cout << "What is the max process size?\n> ";
     getline(cin, input);
-    while ( (!Is_Valid_Numeric_Input(input)) || (!(stoi(input) <= max_mem_size)) ) {
+    while ( (!Is_Valid_Numeric_Input(input)) ||
+            (stoi(input) == 0) ||
+            (!(stoi(input) <= max_mem_size)) ) {
+
         cout << "INVALID: Max process size has to be within max memory size " << max_mem_size << ":\n> ";
         getline(cin, input);
     }
@@ -153,8 +159,14 @@ void SystemGenerator::Set_Memory(OS &an_OS) {
 
     cout << "What is the page size?\n> ";
     getline(cin, input);
-    while ( (!Is_Valid_Numeric_Input(input)) || (!(stoi(input) <= max_mem_size)) || (!Is_Power_Of_Two(input)) ) {
-        cout << "INVALID: Page size has to be within max memory size " << max_mem_size << " and is a power of 2:\n> ";
+    while ( (!Is_Valid_Numeric_Input(input)) ||
+            (!(stoi(input) <= max_mem_size)) ||
+            (!Is_Power_Of_Two(input)) ||
+            (max_mem_size % stoi(input) != 0) ) {
+
+        cout << "INVALID: Page size has to be within max memory size "
+             << max_mem_size
+             << ", is a power of 2, and divides max memory size:\n> ";
         getline(cin, input);
     }
     int page_size = stoi(input);
