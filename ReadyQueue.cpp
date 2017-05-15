@@ -19,15 +19,3 @@ void ReadyQueue::enqueue(PCB *a_process) {
     process_list_.push_back(a_process);
     return;
 }
-
-PCB *ReadyQueue::remove(const unsigned int pid) {
-    for (auto it = process_list_.begin(); it != process_list_.end(); ++it) {
-        if ( (*it)->Get_PID() == pid ) {
-            PCB *removed_process = *it;
-            process_list_.erase(it);
-            return removed_process;
-        }
-    }
-
-    return nullptr;
-}

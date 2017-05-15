@@ -14,9 +14,7 @@ class ReadyQueue: public PCBQueue {
 public:
     // SJF Scheduling.
     virtual void enqueue(PCB *a_process);
-
-    PCB *remove(const unsigned int pid);
-
+    
 private:
 };
 

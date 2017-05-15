@@ -91,6 +91,59 @@ PCB *DiskQueue::dequeue() {
     return removed_process;
 }
 
+PCB *DiskQueue::remove(const unsigned int pid) {
+    if (empty()) {
+        return nullptr;
+    }
+
+    Node *temp = queue_tail_;
+    while (temp->next->process->Get_PID() != pid) { // Advance temp to node before desired node if it exists.
+        temp = temp->next;
+        if (temp->next == queue_head_) { // Not found.
+            return nullptr;
+        }
+    }
+
+    PCB *removed_process = temp->process;
+    // Removal sequence.
+    if (current_size_ == 1) { // Single item.
+        queue_head_ = nullptr;
+        queue_tail_ = nullptr;
+        seek_head_ = nullptr;
+    } else if (temp->next == queue_head_) { // removed node is at the front.
+        temp = temp->next;
+        queue_head_ = queue_head_->next;
+        queue_tail_->next = queue_head_;
+        if (temp == seek_head_) {
+            seek_head_ = seek_head_->next;
+        }
+    } else if (temp->next == queue_tail_) { // removed node is at the end.
+        queue_tail_ = temp;
+        temp = temp->next;
+        queue_tail_->next = queue_head_;
+        if (temp == seek_head_) {
+            seek_head_ = seek_head_->next;
+        }
+    } else { // removed node is in the middle.
+        Node *temp2 = temp; // Require another Node* to keep track of current temp;
+        temp = temp->next; // |temp2|->|temp|->|node|
+        temp2->next  = temp->next; // |temp2|->|node|, |temp|
+        if (temp == seek_head_) {
+            seek_head_ = seek_head_->next;
+        }
+
+        temp2 = nullptr;
+    }
+
+    // clean up.
+    temp->process = nullptr;
+    temp->next = nullptr;
+    delete temp;
+    --current_size_;
+
+    return removed_process;
+}
+
 PCB *DiskQueue::front() {
     if (empty()) {
         return nullptr;

@@ -36,6 +36,8 @@ public:
     // Assumes queue is non-empty.
     virtual PCB *dequeue();
 
+    PCB *remove(const unsigned int pid);
+
     // Returns a reference to the process in the front of the queue.
     // Assumes queue is non-empty.
     PCB *front();

@@ -26,6 +26,8 @@ public:
     // Assumes queue is non-empty.
     virtual PCB *Remove_Running_Process() { return process_queue_->dequeue(); }
 
+    virtual PCB *Remove_Process(const unsigned int pid) { return process_queue_->remove(pid); }
+
     // Returns a const reference to the process in front of the queue.
     // Assumes queue is non-empty.
     virtual const PCB *Running_Process() { return process_queue_->front(); }
