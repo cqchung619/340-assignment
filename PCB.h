@@ -21,7 +21,8 @@ public:
 
     // @a_PID: OS assigned integer value.
     // All newly constructed PCBs are in the NEW state.
-    PCB(const unsigned int a_PID, const unsigned int pages, double initial_burst): PID_{a_PID}, number_of_pages_{pages} {
+    PCB(const unsigned int a_PID, const unsigned int pages, const unsigned int size, double initial_burst)
+    : PID_{a_PID}, SIZE_{size}, number_of_pages_{pages} {
         stats_.cpu_usage_time = 0;
         stats_.actual_burst_time = 0;
         stats_.estimated_burst_time = initial_burst;
@@ -32,10 +33,12 @@ public:
 
     // @rhs: PCB to be copied.
     // Constructs a copy of rhs.
-    PCB(const PCB &rhs): PID_{rhs.PID_}, number_of_pages_{rhs.number_of_pages_}, parameters_{rhs.parameters_} {}
+    PCB(const PCB &rhs)
+    : PID_{rhs.PID_}, SIZE_{rhs.SIZE_}, number_of_pages_{rhs.number_of_pages_}, parameters_{rhs.parameters_} {}
 
-    // PID accessor. PID never changes.
+    // PID/SIZE accessor. PID/SIZE never changes.
     const unsigned int &Get_PID() const { return PID_; }
+    const unsigned int &Get_SIZE() const { return SIZE_; }
 
     //////////////////// Parameter accessor and modifier. ////////////////////
 
@@ -84,6 +87,7 @@ private:
     } stats_;
 
     const unsigned int PID_;
+    const unsigned int SIZE_;
     unsigned int number_of_pages_;
 
     map<unsigned int, unsigned int> page_table_;
