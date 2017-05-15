@@ -34,7 +34,15 @@ public:
     // @rhs: PCB to be copied.
     // Constructs a copy of rhs.
     PCB(const PCB &rhs)
-    : PID_{rhs.PID_}, SIZE_{rhs.SIZE_}, number_of_pages_{rhs.number_of_pages_}, parameters_{rhs.parameters_} {}
+    : stats_{rhs.stats_}, PID_{rhs.PID_}, SIZE_{rhs.SIZE_}, number_of_pages_{rhs.number_of_pages_}
+    , page_table_{rhs.page_table_}, parameters_{rhs.parameters_} {
+        // stats_.cpu_usage_time       = rhs.stats_.cpu_usage_time;
+        // stats_.actual_burst_time    = rhs.stats_.actual_burst_time;
+        // stats_.estimated_burst_time = rhs.stats_.estimated_burst_time;
+        // stats_.burst_time_left      = rhs.stats_.burst_time_left;
+        // stats_.total_burst_time     = rhs.stats_.total_burst_time;
+        // stats_.burst_count          = rhs.stats_.burst_count;
+    }
 
     // PID/SIZE accessor. PID/SIZE never changes.
     const unsigned int &Get_PID() const { return PID_; }
@@ -62,10 +70,15 @@ public:
 
     // Return number of pages.
     size_t Get_Page_Table_Size() { return number_of_pages_; }
+
     // Return frame number associated with page_number.
     unsigned int Get_Frame_At(const unsigned int page_number) { return page_table_[page_number]; }
+
     // Return a string of all frames being used in order by page number.
-    string Get_Frame_List();
+    string Get_Frame_List_String();
+    // Return a vector of all frame numbers being used.
+    vector<unsigned int> Get_Frame_List();
+
     // Update page table with frame number associated with each page number.
     void Update_Page_Table(const vector<unsigned int> &allocated_frame_list);
     // Clear page table. Process's memory is being deallocated.
@@ -90,6 +103,7 @@ private:
     const unsigned int SIZE_;
     unsigned int number_of_pages_;
 
+    // <page#, frame#>
     map<unsigned int, unsigned int> page_table_;
 
     // Contents should be:

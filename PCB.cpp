@@ -31,7 +31,7 @@ void PCB::Update_Page_Table(const vector<unsigned int> &allocated_frame_list) {
     }
 }
 
-string PCB::Get_Frame_List() {
+string PCB::Get_Frame_List_String() {
     string frame_list = "";
     for (size_t i = 0; i < page_table_.size(); ++i) {
         if ( (i + 1) == page_table_.size() ) {
@@ -39,6 +39,15 @@ string PCB::Get_Frame_List() {
         } else {
             frame_list += to_string(page_table_[i]) + ", ";
         }
+    }
+
+    return frame_list;
+}
+
+vector<unsigned int> PCB::Get_Frame_List() {
+    vector<unsigned int> frame_list;
+    for (size_t i = 0; i < page_table_.size(); ++i) {
+        frame_list.push_back(page_table_[i]);
     }
 
     return frame_list;
