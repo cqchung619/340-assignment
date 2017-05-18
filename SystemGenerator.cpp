@@ -135,41 +135,59 @@ void SystemGenerator::Set_Initial_CPU_Scheduling_Values(OS &an_OS) {
 void SystemGenerator::Set_Memory(OS &an_OS) {
     string input = "";
 
-    cout << "What is the size of memory?\n> ";
-    getline(cin, input);
-    while ( (!Is_Valid_Numeric_Input(input)) ||
-            (stoi(input) == 0) ||
-            (stoi(input) % 2 != 0) ) {
+    int max_mem_size = 0;
+    int max_process_size = 0;
+    int page_size = 0;
+    bool restart = true;
+    while (restart) {
+        restart = false;
 
-        cout << "INVALID: Max memory size should be greater than 0 and divisible by 2:\n> ";
+        cout << "What is the size of memory?\n> ";
         getline(cin, input);
-    }
-    int max_mem_size = stoi(input);
+        while ( (!Is_Valid_Numeric_Input(input)) ||
+                (stoi(input) == 0) ||
+                (stoi(input) % 2 != 0) ) {
 
-    cout << "What is the max process size?\n> ";
-    getline(cin, input);
-    while ( (!Is_Valid_Numeric_Input(input)) ||
-            (stoi(input) == 0) ||
-            (!(stoi(input) <= max_mem_size)) ) {
+            cout << "INVALID: Max memory size should be greater than 0 and divisible by 2:\n> ";
+            getline(cin, input);
+        }
+        max_mem_size = stoi(input);
 
-        cout << "INVALID: Max process size has to be within max memory size " << max_mem_size << ":\n> ";
+        cout << "What is the max process size?\n> ";
         getline(cin, input);
-    }
-    int max_process_size = stoi(input);
+        while ( ( (!Is_Valid_Numeric_Input(input)) ||
+                  (stoi(input) == 0) ||
+                  (!(stoi(input) <= max_mem_size)) ) &&
+                !(input == "r" || input == "R") ) {
 
-    cout << "What is the page size?\n> ";
-    getline(cin, input);
-    while ( (!Is_Valid_Numeric_Input(input)) ||
-            (!(stoi(input) <= max_mem_size)) ||
-            (!Is_Power_Of_Two(input)) ||
-            (max_mem_size % stoi(input) != 0) ) {
+            cout << "INVALID: Max process size has to be within max memory size " << max_mem_size << ". Enter \"r\" ro restart:\n> ";
+            getline(cin, input);
+        }
+        if ( (input == "r") || (input == "R") ) {
+            restart = true;
+            continue;
+        }
+        max_process_size = stoi(input);
 
-        cout << "INVALID: Page size has to be within max memory size "
-             << max_mem_size
-             << ", is a power of 2, and divides max memory size:\n> ";
+        cout << "What is the page size?\n> ";
         getline(cin, input);
+        while ( ( (!Is_Valid_Numeric_Input(input)) ||
+                  (!(stoi(input) <= max_mem_size)) ||
+                  (!Is_Power_Of_Two(input)) ||
+                  (max_mem_size % stoi(input) != 0) ) &&
+                !(input == "r" || input == "R") ) {
+
+            cout << "INVALID: Page size has to be within max memory size "
+                 << max_mem_size
+                 << ", is a power of 2, and divides max memory size. Enter \"r\" ro restart:\n> ";
+            getline(cin, input);
+        }
+        if ( (input == "r") || (input == "R") ) {
+            restart = true;
+            continue;
+        }
+        page_size = stoi(input);
     }
-    int page_size = stoi(input);
 
     an_OS.Initialize_Memory(max_mem_size, max_process_size, page_size);
 }
